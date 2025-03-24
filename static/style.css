@@ -1,0 +1,37 @@
+#logo_st{
+    width: 100%;
+}
+
+body{
+    background-image: url('static/img/istockphoto-937914576-1024x1024.jpg');
+    background-size: cover; /* Adatta l'immagine per coprire l'intero sfondo */
+    background-repeat: no-repeat; /* Evita che l'immagine si ripeta */
+    background-position: center; /* Centra l'immagine */
+}
+
+.time-slots {
+    border: 1px solid #dee2e6;
+    border-radius: 0.25rem;
+    padding: 10px;
+    margin-top: 20px;
+    height: 300px; /* o una altezza che preferisci */
+    overflow-y: auto;
+}
+.time-slots ul {
+    list-style: none;
+    padding: 0;
+}
+.time-slots li.active {
+    background-color: #007bff;
+    color: white;
+}
+#calendar td {
+    cursor: pointer;
+}
+#calendar td.today {
+    background-color: #f0f0f0;
+}
+#calendar td.active {
+    background-color: #007bff;
+    color: white;
+}

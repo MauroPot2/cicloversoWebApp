@@ -1,0 +1,102 @@
+{% extends "basic/layout.html" %}
+
+{% block content %}
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <h2 class="mb-4">Registrazione</h2>
+            <form id="registrazione-form" class="row g-3" method="POST" action="/registrati">
+                <div class="col-md-6">
+                    <label for="inputNome" class="form-label">Nome</label>
+                    <input type="text" class="form-control" id="inputNome" name="nome" value="{{ request.form.nome if request.form.nome }}" required>
+                    <div id="nome-errore" class="invalid-feedback"></div>
+                </div>
+                <div class="col-md-6">
+                    <label for="inputCognome" class="form-label">Cognome</label>
+                    <input type="text" class="form-control" id="inputCognome" name="cognome" value="{{ request.form.cognome if request.form.cognome }}" required>
+                    <div id="cognome-errore" class="invalid-feedback"></div>
+                </div>
+                <div class="col-md-6">
+                    <label for="inputEmail4" class="form-label">Email</label>
+                    <input type="email" class="form-control" id="inputEmail4" name="email" value="{{ request.form.email if request.form.email }}" required>
+                    <div id="email-errore" class="invalid-feedback"></div>
+                </div>
+                <div class="col-md-6">
+                    <label for="inputCellulare" class="form-label">Cellulare</label>
+                    <input type="tel" class="form-control" id="inputCellulare" name="cellulare" value="{{ request.form.cellulare if request.form.cellulare }}" required>
+                    <div id="cellulare-errore" class="invalid-feedback"></div>
+                </div>
+                <div class="col-md-6">
+                    <label for="inputPassword" class="form-label">Password</label>
+                    <input type="password" class="form-control" id="inputPassword" name="password" required>
+                    <div id="password-errore" class="invalid-feedback"></div>
+                </div>
+                <div class="col-12">
+                    <button type="submit" class="btn btn-primary">Registrati</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+    document.getElementById('registrazione-form').addEventListener('submit', function(event) {
+        let nome = document.getElementById('inputNome');
+        let cognome = document.getElementById('inputCognome');
+        let email = document.getElementById('inputEmail4');
+        let cellulare = document.getElementById('inputCellulare');
+        let password = document.getElementById('inputPassword');
+
+        let nomeValido = nome.value.trim() !== '';
+        let cognomeValido = cognome.value.trim() !== '';
+        let emailValido = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.value);
+        let cellulareValido = /^[0-9\+]+$/.test(cellulare.value);
+        let passwordValida = password.value.length >= 8 && /[!@#$%^&*]/.test(password.value);
+
+        if (!nomeValido) {
+            nome.classList.add('is-invalid');
+            document.getElementById('nome-errore').textContent = 'Campo obbligatorio.';
+            event.preventDefault();
+        } else {
+            nome.classList.remove('is-invalid');
+            document.getElementById('nome-errore').textContent = '';
+        }
+
+        if (!cognomeValido) {
+            cognome.classList.add('is-invalid');
+            document.getElementById('cognome-errore').textContent = 'Campo obbligatorio.';
+            event.preventDefault();
+        } else {
+            cognome.classList.remove('is-invalid');
+            document.getElementById('cognome-errore').textContent = '';
+        }
+
+        if (!emailValido) {
+            email.classList.add('is-invalid');
+            document.getElementById('email-errore').textContent = 'Formato email non valido.';
+            event.preventDefault();
+        } else {
+            email.classList.remove('is-invalid');
+            document.getElementById('email-errore').textContent = '';
+        }
+
+        if (!cellulareValido) {
+            cellulare.classList.add('is-invalid');
+            document.getElementById('cellulare-errore').textContent = 'Formato cellulare non valido.';
+            event.preventDefault();
+        } else {
+            cellulare.classList.remove('is-invalid');
+            document.getElementById('cellulare-errore').textContent = '';
+        }
+
+        if (!passwordValida) {
+            password.classList.add('is-invalid');
+            document.getElementById('password-errore').textContent = 'Password non valida.';
+            event.preventDefault();
+        } else {
+            password.classList.remove('is-invalid');
+            document.getElementById('password-errore').textContent = '';
+        }
+    });
+</script>
+{% endblock %}

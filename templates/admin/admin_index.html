@@ -1,0 +1,85 @@
+{% extends "basic/layout.html" %}
+{% block content %}
+
+<div class="d-flex">
+    {% include 'admin/sidebar.html' %}
+
+    <div class="container mt-3">
+        <div class="card">
+            <div class="card-body">
+                <h5 class="card-title">Gestione Slot Disponibili</h5>
+                <p class="card-text">Visualizza e aggiungi slot per le prenotazioni.</p>
+                <div class="mb-3">
+                    <label for="dataSlot" class="form-label">Data:</label>
+                    <input type="date" id="dataSlot" name="data" class="form-control">
+                </div>
+                <div class="mb-3">
+                    <label for="orarioSlot" class="form-label">Orario (HH:MM):</label>
+                    <input type="time" id="orarioSlot" name="orario" class="form-control">
+                </div>
+                <button onclick="aggiungiSlot()" class="btn btn-primary">Aggiungi Slot</button>
+                <ul id="orario" class="mt-3 list-group"></ul>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    function aggiungiSlot() {
+        const dataSlot = document.getElementById('dataSlot').value;
+        const orarioSlot = document.getElementById('orarioSlot').value;
+
+        const formData = new URLSearchParams();
+        formData.append('data', dataSlot);
+        formData.append('orario', orarioSlot);
+
+        fetch('/admin/aggiungi_slot', {
+            method: 'POST',
+            body: formData,
+        })
+        .then(response => {
+            if (!response.ok) {
+                return response.text().then(text => { throw new Error(text) });
+            }
+            return response.json();
+        })
+        .then(result => {
+            alert(result.messaggio);
+            fetchTimeSlots(new Date(dataSlot));
+        })
+        .catch(error => {
+            alert(error.message || "Errore di rete durante l'aggiunta dello slot.");
+        });
+    }
+
+    function fetchTimeSlots(date) {
+    fetch(`/admin/slot_disponibili?data=${date.toISOString().split('T')[0]}`)
+        .then(response => {
+            if (!response.ok) {
+                // Gestisci le risposte non OK (es. 404, 500)
+                return response.text().then(text => { throw new Error(text) });
+            }
+            return response.json();
+        })
+        .then(slots => {
+            let html = '';
+            slots.forEach(slot => {
+                html += `<li class="list-group-item">${slot}</li>`;
+            });
+            document.getElementById('orario').innerHTML = html;
+        })
+        .catch(error => {
+            // Gestisci gli errori (es. risposta HTML, errori di rete)
+            console.error("Errore durante il recupero degli slot:", error);
+            alert("Errore durante il recupero degli slot: " + error.message);
+        });
+}
+
+    document.getElementById('dataSlot').addEventListener('change', function() {
+        fetchTimeSlots(new Date(this.value));
+    });
+
+    fetchTimeSlots(new Date(document.getElementById('dataSlot').value));
+</script>
+
+{% endblock %}

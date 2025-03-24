@@ -1,0 +1,14 @@
+{% extends "basic/layout.html" %}
+{% block content %}
+
+{% for servizi in servizi %}
+<div class="text-bg-dark me-md-3 pt-3 px-3 pt-md-5 px-md-5 text-center overflow-hidden">
+      <div class="my-3 py-3">
+        <h2 class="display-5">{{ servizi.Servizio }}</h2>
+        <p class="lead">{{ servizi.Prezzo }}</p>
+      </div>
+      <div class="bg-body-tertiary shadow-sm mx-auto img-fluid" style="width: 80%; height: 300px; border-radius: 21px 21px 0 0;"><img src="{{ servizi.immagine }}"></div>
+    </div>
+{% endfor %}
+
+{% endblock %}

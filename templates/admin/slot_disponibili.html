@@ -1,0 +1,19 @@
+{% extends "basic/layout.html" %}
+{% block content %}
+
+<div class="d-flex">
+    {% include 'admin/sidebar.html' %} 
+
+    <div class="container mt-3">
+        <h2>Slot Disponibili per {{ data }}</h2>
+        <ul class="list-group">
+            {% for slot in slot_disponibili %}
+                <li class="list-group-item">
+                    {{ slot.orario.strftime('%H:%M') }} - Servizio: {{ slot.servizio_id }} - {% if slot.disponibile %}Disponibile{% else %}Prenotato{% endif %}
+                </li>
+            {% endfor %}
+        </ul>
+    </div>
+</div>
+
+{% endblock %}

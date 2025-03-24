@@ -1,0 +1,47 @@
+{% extends "basic/layout.html" %}
+{% block content %}
+
+<div class="d-flex">
+    {% include 'admin/sidebar.html' %}
+
+    <div class="container mt-3">
+        <div class="card">
+            <div class="card-body">
+                <h5 class="card-title">Gestione Servizi</h5>
+                <p class="card-text">Aggiungi, modifica o elimina servizi offerti.</p>
+
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Servizio</th>
+                            <th>Prezzo</th>
+                            <th>Disponibilità</th>
+                            <th>Immagine</th>
+                            <th>Azioni</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for servizio in servizi %}
+                        <tr>
+                            <td>{{ servizio.ServiziID }}</td>
+                            <td>{{ servizio.Servizio }}</td>
+                            <td>{{ servizio.Prezzo }}</td>
+                            <td>{{ servizio.Disponibilitá }}</td>
+                            <td>{{ servizio.immagine }}</td>
+                            <td>
+                                <button class="btn btn-sm btn-warning">Modifica</button>
+                                <button class="btn btn-sm btn-danger">Elimina</button>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+
+                <button class="btn btn-success">Aggiungi Servizio</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}

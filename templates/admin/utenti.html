@@ -1,0 +1,47 @@
+{% extends "basic/layout.html" %}
+{% block content %}
+
+<div class="d-flex">
+    {% include 'admin/sidebar.html' %}
+
+    <div class="container mt-3">
+        <div class="card">
+            <div class="card-body">
+                <h5 class="card-title">Gestione Utenti</h5>
+                <p class="card-text">Visualizza e gestisci gli utenti registrati.</p>
+
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Nome</th>
+                            <th>Cognome</th>
+                            <th>Email</th>
+                            <th>Cellulare</th>
+                            <th>Ruolo</th>
+                            <th>Azioni</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for utente in utenti %}
+                        <tr>
+                            <td>{{ utente.id }}</td>
+                            <td>{{ utente.nome }}</td>
+                            <td>{{ utente.cognome }}</td>
+                            <td>{{ utente.email }}</td>
+                            <td>{{ utente.cellulare }}</td>
+                            <td>{{ utente.ruolo }}</td>
+                            <td>
+                                <button class="btn btn-sm btn-warning">Modifica</button>
+                                <button class="btn btn-sm btn-danger">Elimina</button>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
