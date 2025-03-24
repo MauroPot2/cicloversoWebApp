@@ -4,37 +4,23 @@
 <div class="d-flex">
     {% include 'admin/sidebar.html' %} 
 
-    <div class="container mt-3">
+    <div class="container">
         <div class="row">
-            <div class="col-md-6">
-                <h2>Calendario</h2>
+            <div class="col-md-4">
                 </div>
-            <div class="col-md-6">
+            <div class="col-md-8">
                 <h2>Orari Disponibili</h2>
-                <div class="time-slots">
-                    <ul class="list-group" id="orario">
-                        </ul>
-                </div>
-                <form id="prenotazioneForm">
-                    </form>
+                <ul id="orario" class="list-group">
+                    </ul>
+                <div id="slotDetails">
+                    </div>
+                <button id="prenotaButton" class="btn btn-primary">Prenota</button>
             </div>
         </div>
     </div>
 </div>
 
 <script src="{{ url_for('static', filename='js/calendarscript.js') }}"></script>
-<script>
-    document.getElementById('dataPrenotazione').addEventListener('change', function() {
-        const data = this.value;
-        fetch(`/slot_prenotazione?data=${data}`)
-            .then(response => response.json())
-            .then(slots => {
-                let html = '';
-                slots.forEach(slot => {
-                    html += `<li class="list-group-item">${slot.orario} - Servizio: ${slot.servizio_id}</li>`;
-                });
-                document.getElementById('orario').innerHTML = html;
-            });
-    });
-</script>
+<script src="{{ url_for('static', filename='js/prenotazione.js') }}"></script>
+
 {% endblock %}
