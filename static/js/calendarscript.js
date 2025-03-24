@@ -42,7 +42,7 @@ async function generateCalendar(date, view) {
             }
             calendarBody += '</tr>';
         }
-    } else if (view === 'week') {
+    } else  if (view === 'week') {
         const startOfWeek = new Date(date);
         startOfWeek.setDate(date.getDate() - date.getDay());
 
@@ -135,38 +135,28 @@ function fetchTimeSlots(date) {
             });
         });
     }
-async function prenotaSlot(data, orario) {
-    try {
-        // Effettua una richiesta GET al backend per verificare l'autenticazione
-        const authResponse = await fetch('/prenota', {
-            method: 'GET',
-        });
-
-        // Verifica se la risposta è un reindirizzamento (utente non autenticato)
-        if (authResponse.redirected) {
-            // Reindirizza l'utente alla pagina di login
-            window.location.href = "/log_in";
-        } else {
-            // L'utente è autenticato, procedi con la prenotazione
-            const response = await fetch('/prenota', {
+    async function prenotaSlot(data, orario, servizio_id) {
+        try {
+            const response = await fetch('/api/prenota_slot', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
                 },
-                body: JSON.stringify({ data: data, orario: orario }),
+                body: JSON.stringify({ data: data, orario: orario, servizio_id: servizio_id }),
             });
-
+    
             const result = await response.json();
             if (response.ok) {
                 alert(result.messaggio);
+                // Aggiorna la visualizzazione del calendario o della lista degli slot
+                generateCalendar(currentDate, currentView); // Esempio: aggiorna il calendario
             } else {
                 alert(result.error);
             }
+        } catch (error) {
+            alert("Errore di rete durante la prenotazione.");
         }
-    } catch (error) {
-        alert("Errore di rete durante la prenotazione.");
     }
-}
 
 async function inviaPrenotazione() {
     const servizioId = document.getElementById('servizio').value;

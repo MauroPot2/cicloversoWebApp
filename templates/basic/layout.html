@@ -102,10 +102,6 @@
               </ul>
             </li>
           </ul>
-          <form class="d-flex" role="search">
-            <input class="form-control me-2" type="search" placeholder="Search" aria-label="Search">
-            <button class="btn btn-outline-success" type="submit">Search</button>
-          </form>
         </div>
       </div>
     </nav>
@@ -115,7 +111,7 @@
     {% block content %}
     {% endblock %}
     {% if session.user_id %}
-    <p>Sei loggato come {{ session.ruolo }}.</p>
+    <p>Ciao {{ session.ruolo }}!</p>
 {% endif %}
 <!--footer-->
     <footer class="container py-5">

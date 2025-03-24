@@ -6,6 +6,7 @@ CREATE TABLE slot_disponibili (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     data DATE NOT NULL,
     orario TIME NOT NULL,
+    servizio_id INTEGER,
     disponibile INTEGER NOT NULL DEFAULT 1, -- 1 = disponibile, 0 = non disponibile
     UNIQUE (data, orario) -- Assicura che non ci siano slot duplicati per la stessa data e ora
 );

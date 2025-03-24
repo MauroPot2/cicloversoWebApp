@@ -50,5 +50,5 @@ inserisci_admin(
     email='test@example.com',
     cellulare='9876543210',
     password='Test100.',
-    ruolo='utente' #oppure lascia admin se deve essere admin
+    ruolo='utente' 
 )

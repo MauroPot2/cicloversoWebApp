@@ -10,11 +10,13 @@ import secrets
 from flask_mail import Mail, Message
 import os
 import config
+from flask_cors import CORS
 
 secret_key = secrets.token_hex(16)
 print(f"Chiave segreta: {secret_key}")
 
 app = Flask(__name__)
+CORS(app)
 app.secret_key = secret_key
 app.config['SESSION_PERMANENT'] = False
 app.config['SESSION_TYPE'] = 'filesystem'
@@ -248,7 +250,7 @@ def login():
         #aggiungere validazione email e password
         conn = sqlite3.connect('usersdb.db')
         cursore = conn.cursor()
-        cursore.execute("SELECT id, hash_password, ruolo FROM utenti WHERE email = ?", (email,)) #aggiunta hash_password
+        cursore.execute("SELECT id, hash_password, ruolo FROM utenti WHERE email = ?", (email,))
         user = cursore.fetchone()
         conn.close()
         if user:
@@ -410,6 +412,70 @@ def reimposta_password_token(token):
         flash('Password reimpostata con successo.', 'success')
         return redirect(url_for('login'))
     return render_template('categoria/reimposta_password_token.html', token=token)
+
+
+#API
+@app.route('/api/slot', methods=['GET'])
+def get_slot():
+    data_str = request.args.get('data')
+    if not data_str:
+        return jsonify({"error": "Data mancante"}), 400
+
+    try:
+        data_datetime = datetime.strptime(data_str, '%Y-%m-%d').date()
+        slot_disponibili = Slot.get_available_slots_by_date(data_datetime)
+        slot_dati = [{'orario': slot.orario.strftime('%H:%M'), 'servizio_id': slot.servizio_id} for slot in slot_disponibili]
+        return jsonify(slot_dati)
+    except ValueError:
+        return jsonify({"error": "Formato data non valido"}), 400
+
+@app.route('/api/slot', methods=['POST'])
+def create_slot():
+    data = request.json.get('data')
+    orario = request.json.get('orario')
+    servizio_id = request.json.get('servizio_id')
+
+    try:
+        data_datetime = datetime.strptime(data, '%Y-%m-%d').date()
+        orario_time = datetime.strptime(orario, '%H:%M').time()
+
+        slot = Slot(data_datetime, orario_time, servizio_id=servizio_id)
+        slot.save()
+
+        return jsonify({"messaggio": "Slot creato con successo."})
+    except Exception as e:
+        return jsonify({"error": f"Errore durante la creazione dello slot: {e}"})
+
+@app.route('/api/prenota_slot', methods=['POST'])
+def prenota_slot_api():
+    data = request.json.get('data')
+    orario = request.json.get('orario')
+    servizio_id = request.json.get('servizio_id')
+
+    try:
+        data_datetime = datetime.strptime(data, '%Y-%m-%d').date()
+        orario_time = datetime.strptime(orario, '%H:%M').time()
+
+        conn = sqlite3.connect('usersdb.db')
+        cursore = conn.cursor()
+        cursore.execute("UPDATE slot_disponibili SET disponibile = 0 WHERE data = ? AND orario = ? AND servizio_id = ?",
+                       (data_datetime.isoformat(), orario_time.isoformat(), servizio_id))
+        conn.commit()
+        conn.close()
+
+        return jsonify({"messaggio": "Prenotazione effettuata con successo."})
+    except Exception as e:
+        return jsonify({"error": f"Errore durante la prenotazione: {e}"})
+
+@app.route('/api/servizi', methods=['GET'])
+def get_servizi():
+    conn = sqlite3.connect('usersdb.db')
+    cursore = conn.cursor()
+    cursore.execute("SELECT id, nome FROM servizi")
+    servizi = [{'id': row[0], 'nome': row[1]} for row in cursore.fetchall()]
+    conn.close()
+    return jsonify(servizi)
+
 
 if __name__ == '__main__':
     app.run(debug=True)
