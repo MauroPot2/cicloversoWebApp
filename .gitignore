@@ -3,3 +3,4 @@ __pycache__
 usersdb.db
 config.py
 flask_session
+venv
