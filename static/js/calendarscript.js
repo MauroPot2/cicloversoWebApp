@@ -11,7 +11,7 @@ const nextDayButton = document.getElementById('nextDay');
 const dayControls = document.getElementById('dayControls');
 
 let currentDate = new Date();
-let currentView = 'month'; // Inizia con la visualizzazione mensile
+let currentView = 'month';
 
 async function generateCalendar(date, view) {
     const year = date.getFullYear();
@@ -36,24 +36,25 @@ async function generateCalendar(date, view) {
                 } else {
                     const isToday = today.getDate() === dayCounter && today.getMonth() === month && today.getFullYear() === year;
                     const dayClass = isToday ? 'today' : '';
-                    calendarBody += `<td class="${dayClass}">${dayCounter}</td>`;
+                    const currentDateStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(dayCounter).padStart(2, '0')}`;
+                    calendarBody += `<td class="${dayClass}"><button class="btn btn-outline-secondary m-1" style="width: 40px;" data-date="${currentDateStr}">${dayCounter}</button></td>`;
                     dayCounter++;
                 }
             }
             calendarBody += '</tr>';
         }
-    } else  if (view === 'week') {
+    } else if (view === 'week') {
         const startOfWeek = new Date(date);
         startOfWeek.setDate(date.getDate() - date.getDay());
 
-        let calendarBody = '<tr>';
+        calendarBody += '<tr>';
         for (let i = 0; i < 7; i++) {
             const currentDay = new Date(startOfWeek);
             currentDay.setDate(startOfWeek.getDate() + i);
 
             const isToday = today.getDate() === currentDay.getDate() && today.getMonth() === currentDay.getMonth() && today.getFullYear() === currentDay.getFullYear();
             const dayClass = isToday ? 'today' : '';
-            calendarBody += `<td class="<span class="math-inline">\{dayClass\}"\></span>{currentDay.getDate()}`;
+            calendarBody += `<td class="${dayClass}">${currentDay.getDate()}`;
 
             const dataStr = currentDay.toISOString().split('T')[0];
             const url = `/slot_prenotazione?data=${dataStr}`;
@@ -64,7 +65,7 @@ async function generateCalendar(date, view) {
 
                 if (response.ok) {
                     slots.forEach(slot => {
-                        calendarBody += `<br><span>${slot.orario} - Servizio: <span class="math-inline">\{slot\.servizio\_id\}</span\><button onclick\="prenotaSlot\('</span>{dataStr}', '<span class="math-inline">\{slot\.orario\}', '</span>{slot.servizio_id}')">Prenota</button>`;
+                        calendarBody += `<br><span>${slot.orario} - Servizio: ${slot.servizio_id}</span><button onclick="prenotaSlot('${dataStr}', '${slot.orario}', '${slot.servizio_id}')">Prenota</button>`;
                     });
                 } else {
                     console.error("Errore nel recupero degli slot:", slots.error);
@@ -82,19 +83,19 @@ async function generateCalendar(date, view) {
         currentDaySpan.textContent = date.toLocaleDateString('it-IT', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
         dayControls.style.display = 'flex';
         calendarBody += '<tr>';
-        calendarBody += `<td>${date.toLocaleDateString('it-IT', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric'})}</td>`;
+        calendarBody += `<td>${date.toLocaleDateString('it-IT', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })}</td>`;
         calendarBody += '<td>';
 
-        const dataStr = date.toISOString().split('T')[0]; // Ottieni la data nel formato YYYY-MM-DD
-        const url = `/slot_prenotazione?data=${dataStr}`; // Costruisci l'URL corretto
+        const dataStr = date.toISOString().split('T')[0];
+        const url = `/slot_prenotazione?data=${dataStr}`;
 
         try {
-            const response = await fetch(`/slot_prenotazione?data=${date.toISOString().split('T')[0]}`);
+            const response = await fetch(url);
             const slots = await response.json();
 
             if (response.ok) {
                 slots.forEach(slot => {
-                    calendarBody += `<tr><td><span>${slot}</span></td><td><button onclick="prenotaSlot('${dataStr}', '${slot}')">Prenota</button></td></tr>`;
+                    calendarBody += `<tr><td><span>${slot.orario}</span></td><td><button onclick="prenotaSlot('${dataStr}', '${slot.orario}', '${slot.servizio_id}')">Prenota</button></td></tr>`;
                 });
             } else {
                 console.error("Errore nel recupero degli slot:", slots.error);
@@ -113,50 +114,29 @@ async function generateCalendar(date, view) {
     calendar.innerHTML = calendarBody;
 }
 
-function fetchTimeSlots(date) {
-    fetch(`/admin/slot_disponibili?data=${date.toISOString().split('T')[0]}`)
-        .then(response => response.json())
-        .then(slots => {
-            let html = '';
-            slots.forEach(slot => {
-                const isActive = selectedTime === slot[0];
-                const className = isActive ? 'active' : '';
-                html += `<li class="list-group-item ${className}" data-time="${slot[0]}">${slot[0]}</li>`;
-            });
-            document.getElementById('orario').innerHTML = html;
-
-            document.getElementById('data').value = date.toISOString().split('T')[0];
-
-            document.querySelectorAll('#orario li').forEach(slot => {
-                slot.addEventListener('click', () => {
-                    selectedTime = slot.dataset.time;
-                    fetchTimeSlots(date);
-                });
-            });
+async function prenotaSlot(data, orario, servizio_id) {
+    try {
+        const response = await fetch('/api/prenota_slot', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ data: data, orario: orario, servizio_id: servizio_id }),
         });
-    }
-    async function prenotaSlot(data, orario, servizio_id) {
-        try {
-            const response = await fetch('/api/prenota_slot', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({ data: data, orario: orario, servizio_id: servizio_id }),
-            });
-    
-            const result = await response.json();
-            if (response.ok) {
-                alert(result.messaggio);
-                // Aggiorna la visualizzazione del calendario o della lista degli slot
-                generateCalendar(currentDate, currentView); // Esempio: aggiorna il calendario
-            } else {
-                alert(result.error);
-            }
-        } catch (error) {
-            alert("Errore di rete durante la prenotazione.");
+
+        const result = await response.json();
+        if (response.ok) {
+            alert(result.messaggio);
+            generateCalendar(currentDate, currentView);
+        } else {
+            alert(result.error);
         }
+    } catch (error) {
+        alert("Errore di rete durante la prenotazione.");
     }
+}
+
+generateCalendar(currentDate, currentView);
 
 async function inviaPrenotazione() {
     const servizioId = document.getElementById('servizio').value;

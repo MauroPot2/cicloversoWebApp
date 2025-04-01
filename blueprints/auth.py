@@ -2,8 +2,11 @@ from flask import Blueprint, render_template, request, session, redirect, url_fo
 import sqlite3
 import bcrypt
 import re
+import os
 import secrets
+from werkzeug.utils import secure_filename
 from flask_mail import Message
+
 
 auth_bp = Blueprint('auth', __name__)
 
@@ -19,23 +22,21 @@ def admin_required(f):
 def login():
     if request.method == "POST":
         email = request.form.get("email")
-        password = request.form.get("password") #Aggiunta password
-        #aggiungere validazione email e password
+        password = request.form.get("password")
         conn = sqlite3.connect('usersdb.db')
         cursore = conn.cursor()
         cursore.execute("SELECT id, hash_password, ruolo FROM utenti WHERE email = ?", (email,))
         user = cursore.fetchone()
         conn.close()
         if user:
-            if check_password(password, user[1]): #aggiunta controllo password
+            if check_password(password, user[1]):
                 session["user_id"] = user[0]
                 session["ruolo"] = user[2]
-                return redirect(url_for("index"))
+                return redirect(url_for("auth.login"))
             else:
-                return render_template("categoria/login.html", error = "password errata")
+                return render_template("categoria/login.html", error="password errata")
         else:
-            return render_template("categoria/login.html", error = "email non trovata")
-
+            return render_template("categoria/login.html", error="email non trovata")
     return render_template("categoria/login.html")
 
 @auth_bp.route('/logout')

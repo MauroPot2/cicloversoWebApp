@@ -1,9 +1,18 @@
-from flask import Blueprint, jsonify, request
+from flask import Blueprint, jsonify, request, render_template
 import sqlite3
 from datetime import datetime
 from slot import Slot
 
 api_bp = Blueprint('api', __name__)
+
+def get_utente_dal_db(utente_id):
+        onn = sqlite3.connect('usersdb.db')
+        cursore = conn.cursor()
+        cursore.execute('SELECT * FROM utenti WHERE id = ?', (utente_id,))
+        utente = cur.fetchone()
+        cur.close()
+        return utente
+
 
 @api_bp.route('/slot', methods=['GET'])
 def get_slot():
@@ -65,3 +74,12 @@ def get_servizi():
     servizi = [{'id': row[0], 'nome': row[1]} for row in cursore.fetchall()]
     conn.close()
     return jsonify(servizi)
+    
+@api_bp.route('/profilo', methods=['GET','POST'])
+def profilo():
+    utente = get_utente_dal_db(utente_id=1)
+
+    if utente:
+        return render_template("categoria/profilo.html", utente=utente)
+    else:
+        return render_template("categoria/registrazione.html")

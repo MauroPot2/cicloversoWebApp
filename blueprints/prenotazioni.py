@@ -1,102 +1,130 @@
 from flask import Blueprint, render_template, jsonify, request, session, redirect, url_for
 import sqlite3
-from datetime import datetime, timedelta
-from slot import Slot  # Assicurati che slot.py sia nel percorso corretto
+import json
 
 prenotazioni_bp = Blueprint('prenotazioni', __name__)
 
-def genera_slot_prenotazione(orari_apertura, data_selezionata, durata_slot_minuti=30):
-    """
-    Genera una lista di slot di prenotazione basati sugli orari di apertura del negozio e la data selezionata.
-    """
-    slot_prenotazione = []
-    for inizio_orario, fine_orario in orari_apertura:
-        inizio = datetime(data_selezionata.year, data_selezionata.month, data_selezionata.day, inizio_orario.hour, inizio_orario.minute)
-        fine = datetime(data_selezionata.year, data_selezionata.month, data_selezionata.day, fine_orario.hour, fine_orario.minute)
-        ora_corrente = inizio
-        while ora_corrente < fine:
-            slot_prenotazione.append(ora_corrente.strftime("%H:%M"))
-            ora_corrente = ora_corrente + timedelta(minutes=durata_slot_minuti)
-    return slot_prenotazione
-
-@prenotazioni_bp.route('/slot_prenotazione', methods=['GET'])
-def slot_prenotazione():
-    data_str = request.args.get('data')
-    if not data_str:
-        return jsonify({"error": "Data mancante"}), 400
-
+def salva_slot(slot):
     try:
-        data_datetime = datetime.strptime(data_str, '%Y-%m-%d').date()
-        slot_disponibili = Slot.get_available_slots_by_date(data_datetime)
-        slot_dati = [{'orario': slot.orario.strftime('%H:%M'), 'servizio_id': slot.servizio_id} for slot in slot_disponibili]
-        return jsonify(slot_dati)
-    except ValueError:
-        return jsonify({"error": "Formato data non valido"}), 400
+        connessione = sqlite3.connect('usersdb.db')
+        cursore = connessione.cursor()
+        cursore.execute('''
+            CREATE TABLE IF NOT EXISTS slot (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                data TEXT,
+                ora_inizio TEXT,
+                ora_fine TEXT,
+                servizio_id INTEGER,
+                disponibile INTEGER NOT NULL DEFAULT 1,
+                prenotazioni TEXT,
+                FOREIGN KEY (servizio_id) REFERENCES servizio(id)
+            )
+        ''')
+        cursore.execute('''
+            INSERT INTO slot (data, ora_inizio, ora_fine, servizio_id, disponibile, prenotazioni)
+            VALUES (?, ?, ?, ?, 1, '[]')
+        ''', (slot['data'], slot['ora_inizio'], slot['ora_fine'], slot['servizio_id']))
+        connessione.commit()
+        cursore.close()
+        connessione.close()
+    except sqlite3.Error as e:
+        print(f"Errore nel database: {e}")
 
-@prenotazioni_bp.route('/prenota', methods=['POST', 'GET'])
-def prenota():
-    """Gestisce le prenotazioni dei servizi."""
-    if not session.get('user_id'):
-        return redirect(url_for('login'))
+def recupera_slot():
+    try:
+        connessione = sqlite3.connect('usersdb.db')
+        cursore = connessione.cursor()
+        cursore.execute('SELECT * FROM slot')
+        slot_dal_db = cursore.fetchall()
+        cursore.close()
+        connessione.close()
+        slot = []
+        for s in slot_dal_db:
+            slot.append({
+                'id': s[0],
+                'data': s[1],
+                'ora_inizio': s[2],
+                'ora_fine': s[3],
+                'servizio_id': s[4],
+                'disponibile': s[5],
+                'prenotazioni': json.loads(s[6]) if s[6] else []
+            })
+        return slot
+    except sqlite3.Error as e:
+        print(f"Errore nel database: {e}")
+        return []
 
-    conn = sqlite3.connect('usersdb.db')
-    conn.row_factory = sqlite3.Row
-    servizi = conn.execute('SELECT * FROM servizi').fetchall()
-    conn.close()
+@prenotazioni_bp.route('/admin/crea_slot', methods=['POST'])
+def crea_slot():
+    data = request.get_json()
+    slot = {
+        'data': data['data'],
+        'ora_inizio': data['ora_inizio'],
+        'ora_fine': data['ora_fine'],
+        'servizio_id': data['servizio']
+    }
+    salva_slot(slot)
+    return '', 204
 
-    if request.method == 'GET':
-        return render_template("categoria/prenotazione.html", servizi=servizi)
+@prenotazioni_bp.route('/admin/recupera_slot', methods=['GET'])
+def get_slot():
+    slot = recupera_slot()
+    return jsonify(slot)
 
-    elif request.method == 'POST':
-        dati_prenotazione = request.get_json()
+@prenotazioni_bp.route('/admin/cancella_slot/<int:slot_id>', methods=['DELETE'])
+def cancella_slot(slot_id):
+    try:
+        conn = sqlite3.connect('usersdb.db')
+        c = conn.cursor()
+        c.execute('DELETE FROM slot WHERE id = ?', (slot_id,))
+        conn.commit()
+        c.close()
+        conn.close()
+        return '', 204
+    except sqlite3.Error as e:
+        print(f"Errore nel database: {e}")
+        return '', 500
 
-        if not dati_prenotazione or 'data' not in dati_prenotazione or 'orario' not in dati_prenotazione or 'servizio_id' not in dati_prenotazione:
-            return jsonify({"error": "Dati mancanti"}), 400
+@prenotazioni_bp.route('/admin/modifica_slot/<int:slot_id>', methods=['PUT'])
+def modifica_slot(slot_id):
+    data = request.get_json()
+    try:
+        conn = sqlite3.connect('usersdb.db')
+        c = conn.cursor()
+        c.execute('UPDATE slot SET data = ?, ora_inizio = ?, ora_fine = ?, servizio_id = ? WHERE id = ?',
+                  (data['data'], data['ora_inizio'], data['ora_fine'], data['servizio'], slot_id))
+        conn.commit()
+        c.close()
+        conn.close()
+        return '', 204
+    except sqlite3.Error as e:
+        print(f"Errore nel database: {e}")
+        return '', 500
 
-        try:
-            data_selezionata = datetime.strptime(dati_prenotazione['data'], '%Y-%m-%d')
-            orario_selezionato = dati_prenotazione['orario']
-            servizio_id = dati_prenotazione['servizio_id']
-        except ValueError:
-            return jsonify({"error": "Formato data o orario non valido"}), 400
-
-        try:
-            conn = sqlite3.connect('usersdb.db')
-            cursore = conn.cursor()
-
-            # Inizio della transazione
-            cursore.execute("BEGIN TRANSACTION")
-
-            # Verifica la disponibilità dello slot
-            cursore.execute("SELECT disponibile FROM slot_disponibili WHERE data = ? AND orario = ?", (data_selezionata.strftime('%Y-%m-%d'), orario_selezionato))
-            slot = cursore.fetchone()
-            if not slot or slot[0] != 1:
-                conn.close()
-                return jsonify({"error": "Slot non disponibile"}), 400
-
-            # Verifica che il servizio esista
-            cursore.execute("SELECT ServiziID FROM servizi WHERE ServiziID = ?", (servizio_id,))
-            servizio = cursore.fetchone()
-            if not servizio:
-                conn.close()
-                return jsonify({"error": "Servizio non trovato"}), 400
-
-            # Memorizza la prenotazione
-            cursore.execute("INSERT INTO prenotazioni (data_ora, servizio_id, utente_id) VALUES (?, ?, ?)", (datetime.combine(data_selezionata, datetime.strptime(orario_selezionato, '%H:%M').time()), servizio_id, session["user_id"]))
-
-            # Aggiorna la disponibilità dello slot
-            cursore.execute("UPDATE slot_disponibili SET disponibile = 0 WHERE data = ? AND orario = ?", (data_selezionata.strftime('%Y-%m-%d'), orario_selezionato))
-
-            # Commit della transazione
-            conn.commit()
-            conn.close()
-
-            return jsonify({'messaggio': 'Prenotazione effettuata con successo!'}), 201
-
-        except sqlite3.Error as e:
-            # Rollback della transazione in caso di errore
-            conn.rollback()
-            conn.close()
-            return jsonify({"error": f"Errore del database: {e}"}), 500
-        except Exception as e:
-            return jsonify({"error": f"Errore generico: {e}"}), 500
+@prenotazioni_bp.route('/admin/aggiungi_prenotazione/<int:slot_id>', methods=['POST'])
+def aggiungi_prenotazione(slot_id):
+    data = request.get_json()
+    try:
+        conn = sqlite3.connect('usersdb.db')
+        c = conn.cursor()
+        c.execute('SELECT prenotazioni FROM slot WHERE id = ?', (slot_id,))
+        result = c.fetchone()
+        if result and result[0]:
+            prenotazioni = json.loads(result[0])
+        else:
+            prenotazioni = []
+        prenotazione = {
+            'nome': data['nome'],
+            'cognome': data['cognome'],
+            'email': data['email'],
+            'telefono': data['telefono']
+        }
+        prenotazioni.append(prenotazione)
+        c.execute('UPDATE slot SET prenotazioni = ? WHERE id = ?', (json.dumps(prenotazioni), slot_id))
+        conn.commit()
+        c.close()
+        conn.close()
+        return '', 204
+    except sqlite3.Error as e:
+        print(f"Errore nel database: {e}")
+        return '', 500

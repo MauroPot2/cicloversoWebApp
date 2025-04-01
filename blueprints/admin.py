@@ -9,7 +9,12 @@ admin_bp = Blueprint('admin', __name__)
 @admin_bp.route('/', methods=['GET'])
 @admin_required
 def admin():
-    return render_template("admin/admin_index.html")
+    conn = sqlite3.connect('usersdb.db')
+    cursore = conn.cursor()
+    cursore.execute("SELECT * FROM utenti WHERE id = ?", (session['user_id'],))
+    admin_utente = cursore.fetchone()
+    conn.close()
+    return render_template("admin/admin_index.html", admin_utente=admin_utente)
 
 @admin_bp.route('/aggiungi_slot', methods=['POST'])
 @admin_required
@@ -66,7 +71,7 @@ def admin_slot_disponibili():
 def gestisci_prenotazioni():
     conn = sqlite3.connect('usersdb.db')
     conn.row_factory = sqlite3.Row
-    prenotazioni = conn.execute("SELECT * FROM prenotazioni").fetchall()
+    prenotazioni = conn.execute("SELECT * FROM prenotazione").fetchall()
     conn.close()
     return render_template('admin/prenotazioni.html', prenotazioni=prenotazioni)
 

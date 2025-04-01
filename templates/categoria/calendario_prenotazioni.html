@@ -1,0 +1,61 @@
+{% extends "basic/layout.html" %}
+
+{% block content %}
+
+<div class="container">
+    <h1>Calendario</h1>
+    <div class="btn-group mb-3">
+        <button id="viewDay" class="btn btn-secondary active">Giorno</button>
+        <button id="viewWeek" class="btn btn-secondary">Settimana</button>
+        <button id="viewMonth" class="btn btn-secondary">Mese</button>
+    </div>
+    <div id="dayControls" style="display: none;">
+        <button id="prevDay" class="btn btn-secondary">&lt;</button>
+        <span id="currentDay"></span>
+        <button id="nextDay" class="btn btn-secondary">&gt;</button>
+    </div>
+    <div id="monthControls">
+        <button id="prevMonth" class="btn btn-secondary">&lt;</button>
+        <span id="currentMonthYear"></span>
+        <button id="nextMonth" class="btn btn-secondary">&gt;</button>
+    </div>
+    <table id="calendar" class="table table-bordered"></table>
+    <div id="slot-container"></div>
+</div>
+
+
+<script src="{{ url_for('static', filename='js/calendarscript.js') }}"></script>
+
+<script>
+document.getElementById('dataPrenotazione').addEventListener('change', function() {
+    const data = this.value;
+    const orarioElement = document.getElementById('orario');
+
+    // Mostra un indicatore di caricamento
+    orarioElement.innerHTML = '<li>Caricamento...</li>';
+
+    fetch(`/slot_prenotazione?data=${data}`)
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('Errore di rete');
+            }
+            return response.json();
+        })
+        .then(slots => {
+            let html = '';
+            if (slots.length === 0) {
+                html = '<li>Nessuno slot disponibile per questa data.</li>';
+            } else {
+                slots.forEach(slot => {
+                    html += `<li class="list-group-item" data-orario="${slot.orario}" data-servizio="${slot.servizio_id}">${slot.orario} - servizio: ${slot.servizio_id}</li>`;
+                });
+            }
+            orarioElement.innerHTML = html;
+        })
+        .catch(error => {
+            console.error("Errore durante il recupero degli slot:", error);
+            orarioElement.innerHTML = '<li>Errore durante il recupero degli slot.</li>';
+        });
+});
+</script>
+{% endblock %}

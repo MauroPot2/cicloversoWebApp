@@ -14,8 +14,19 @@
                     <input type="date" id="dataSlot" name="data" class="form-control">
                 </div>
                 <div class="mb-3">
-                    <label for="orarioSlot" class="form-label">Orario (HH:MM):</label>
-                    <input type="time" id="orarioSlot" name="orario" class="form-control">
+                    <label for="oraInizioSlot" class="form-label">Ora Inizio (HH:MM):</label>
+                    <input type="time" id="oraInizioSlot" name="ora_inizio" class="form-control">
+                </div>
+                <div class="mb-3">
+                    <label for="oraFineSlot" class="form-label">Ora Fine (HH:MM):</label>
+                    <input type="time" id="oraFineSlot" name="ora_fine" class="form-control">
+                </div>
+                <div class="mb-3">
+                    <label for="servizioSlot" class="form-label">Servizio:</label>
+                    <select id="servizioSlot" name="servizio" class="form-control">
+                        <option value="1">Servizio 1</option>
+                        <option value="2">Servizio 2</option>
+                        </select>
                 </div>
                 <button onclick="aggiungiSlot()" class="btn btn-primary">Aggiungi Slot</button>
                 <ul id="orario" class="mt-3 list-group"></ul>
@@ -27,24 +38,32 @@
 <script>
     function aggiungiSlot() {
         const dataSlot = document.getElementById('dataSlot').value;
-        const orarioSlot = document.getElementById('orarioSlot').value;
+        const oraInizioSlot = document.getElementById('oraInizioSlot').value;
+        const oraFineSlot = document.getElementById('oraFineSlot').value;
+        const servizioSlot = document.getElementById('servizioSlot').value;
 
-        const formData = new URLSearchParams();
-        formData.append('data', dataSlot);
-        formData.append('orario', orarioSlot);
+        const slotData = {
+            data: dataSlot,
+            ora_inizio: oraInizioSlot,
+            ora_fine: oraFineSlot,
+            servizio: servizioSlot,
+        };
 
-        fetch('/admin/aggiungi_slot', {
+        fetch('/admin/crea_slot', {
             method: 'POST',
-            body: formData,
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(slotData),
         })
         .then(response => {
             if (!response.ok) {
                 return response.text().then(text => { throw new Error(text) });
             }
-            return response.json();
+            return response;
         })
         .then(result => {
-            alert(result.messaggio);
+            alert("Slot creato con successo");
             fetchTimeSlots(new Date(dataSlot));
         })
         .catch(error => {
@@ -53,27 +72,25 @@
     }
 
     function fetchTimeSlots(date) {
-    fetch(`/admin/slot_disponibili?data=${date.toISOString().split('T')[0]}`)
-        .then(response => {
-            if (!response.ok) {
-                // Gestisci le risposte non OK (es. 404, 500)
-                return response.text().then(text => { throw new Error(text) });
-            }
-            return response.json();
-        })
-        .then(slots => {
-            let html = '';
-            slots.forEach(slot => {
-                html += `<li class="list-group-item">${slot}</li>`;
+        fetch(`/admin/slot_disponibili?data=${date.toISOString().split('T')[0]}`)
+            .then(response => {
+                if (!response.ok) {
+                    return response.text().then(text => { throw new Error(text) });
+                }
+                return response.json();
+            })
+            .then(slots => {
+                let html = '';
+                slots.forEach(slot => {
+                    html += `<li class="list-group-item">${slot}</li>`;
+                });
+                document.getElementById('orario').innerHTML = html;
+            })
+            .catch(error => {
+                console.error("Errore durante il recupero degli slot:", error);
+                alert("Errore durante il recupero degli slot: " + error.message);
             });
-            document.getElementById('orario').innerHTML = html;
-        })
-        .catch(error => {
-            // Gestisci gli errori (es. risposta HTML, errori di rete)
-            console.error("Errore durante il recupero degli slot:", error);
-            alert("Errore durante il recupero degli slot: " + error.message);
-        });
-}
+    }
 
     document.getElementById('dataSlot').addEventListener('change', function() {
         fetchTimeSlots(new Date(this.value));

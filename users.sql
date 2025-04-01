@@ -2,7 +2,7 @@ DROP TABLE IF EXISTS servizi;
 DROP TABLE IF EXISTS utenti;
 DROP TABLE IF EXISTS prenotazioni;
 
-CREATE TABLE slot_disponibili (
+CREATE TABLE slot(
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     data DATE NOT NULL,
     orario TIME NOT NULL,
@@ -11,7 +11,7 @@ CREATE TABLE slot_disponibili (
     UNIQUE (data, orario) -- Assicura che non ci siano slot duplicati per la stessa data e ora
 );
 
-CREATE TABLE prenotazioni (
+CREATE TABLE prenotazione (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     data_ora DATETIME NOT NULL,
     utente_id INTEGER,
@@ -35,8 +35,8 @@ CREATE TABLE servizi (
     ServiziID INTEGER PRIMARY KEY AUTOINCREMENT,
     Servizio VARCHAR(50) NOT NULL,
     Prezzo INTEGER,
-    Disponibilitá INTEGER, -- Modificato da BIT a INTEGER
-    immagine TEXT NOT NULL -- Modificato da BLOB a TEXT
+    Disponibilitá INTEGER, 
+    immagine TEXT NOT NULL 
 );
 
 INSERT INTO servizi (Servizio, Prezzo, Disponibilitá, immagine) VALUES (
@@ -52,3 +52,15 @@ INSERT INTO servizi (Servizio, Prezzo, Disponibilitá, immagine) VALUES (
     1,
     'static/img/cambio.png'
 );
+
+CREATE TABLE orari_apertura (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    apertura_mattina TEXT NOT NULL,
+    chiusura_mattina TEXT NOT NULL,
+    apertura_pomeriggio TEXT NOT NULL,
+    chiusura_pomeriggio TEXT NOT NULL,
+    durata_slot INTEGER NOT NULL
+);
+-- Orario predefinito
+INSERT INTO orari_apertura (apertura_mattina, chiusura_mattina, apertura_pomeriggio, chiusura_pomeriggio, durata_slot)
+VALUES ('10:00', '12:00', '16:00', '18:00', 60):

@@ -5,6 +5,7 @@ from flask_cors import CORS
 import secrets
 import config
 import sqlite3
+import os
 
 app = Flask(__name__)
 CORS(app)
@@ -24,6 +25,10 @@ app.config['MAIL_USERNAME'] = config.MAIL_USERNAME
 app.config['MAIL_PASSWORD'] = config.MAIL_PASSWORD
 mail = Mail(app)
 
+UPLOAD_FOLDER = 'static/uploads'
+app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
+os.makedirs(UPLOAD_FOLDER, exist_ok=True)
+
 # Registrazione dei blueprint
 from blueprints.admin import admin_bp
 from blueprints.auth import auth_bp
@@ -32,7 +37,7 @@ from blueprints.prenotazioni import prenotazioni_bp
 from blueprints.api import api_bp
 
 app.register_blueprint(admin_bp, url_prefix='/admin')
-app.register_blueprint(auth_bp)
+app.register_blueprint(auth_bp, mail=mail)
 app.register_blueprint(servizi_bp, url_prefix='/admin')
 app.register_blueprint(prenotazioni_bp)
 app.register_blueprint(api_bp, url_prefix='/api')
@@ -57,6 +62,16 @@ def manutenzione():
 @app.route('/biomeccanica')
 def biomeccanica():
     return render_template("categoria/biomeccanica.html")
+
+@app.route('/userprenotazione')
+def userprenotazione():
+    return render_template("categoria/calendario_prenotazioni.html")
+
+@app.route('/profilo')
+def profiloUtente():
+    return render_template("categoria/profilo.html")
+
+
 
 if __name__ == '__main__':
     app.run(debug=True)
