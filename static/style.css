@@ -3,7 +3,6 @@
 }
 
 body{
-    background-image: url('static/img/istockphoto-937914576-1024x1024.jpg');
     background-size: cover; /* Adatta l'immagine per coprire l'intero sfondo */
     background-repeat: no-repeat; /* Evita che l'immagine si ripeta */
     background-position: center; /* Centra l'immagine */

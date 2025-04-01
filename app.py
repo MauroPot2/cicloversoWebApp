@@ -2,6 +2,8 @@ from flask import Flask, render_template
 from flask_session import Session
 from flask_mail import Mail
 from flask_cors import CORS
+from database import init_db
+from initadmin import inserisci_admin
 import secrets
 import config
 import sqlite3
@@ -30,22 +32,25 @@ app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 
 # Registrazione dei blueprint
-from blueprints.admin import admin_bp
-from blueprints.auth import auth_bp
-from blueprints.servizi import servizi_bp
-from blueprints.prenotazioni import prenotazioni_bp
-from blueprints.api import api_bp
+from routes.admin import admin_bp
+from routes.auth import auth_bp
+from routes.servizi import servizi_bp
+from routes.prenotazioni import prenotazioni_bp
+from routes.api import api_bp
+from routes.user import user_bp
 
 app.register_blueprint(admin_bp, url_prefix='/admin')
 app.register_blueprint(auth_bp, mail=mail)
 app.register_blueprint(servizi_bp, url_prefix='/admin')
 app.register_blueprint(prenotazioni_bp)
 app.register_blueprint(api_bp, url_prefix='/api')
+app.register_blueprint(user_bp, url_prefix='/utente')
+
 
 # Route principale per la home page
 @app.route('/')
 def index():
-    return render_template('index.html')
+    return render_template('basic/index.html')
 
 @app.route('/contatti')
 def contatti():
@@ -74,4 +79,23 @@ def profiloUtente():
 
 
 if __name__ == '__main__':
+    init_db()
+    inserisci_admin(
+    nome='Admin',
+    cognome='Admin',
+    email='admin@example.com',
+    cellulare='1234567890',
+    password='Admin100.',
+    ruolo='admin'
+    )
+    
+    inserisci_admin(
+    nome='Test',
+    cognome='User',
+    email='test@example.com',
+    cellulare='9876543210',
+    password='Test100.',
+    ruolo='utente' 
+    )
+
     app.run(debug=True)

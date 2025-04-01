@@ -32,7 +32,10 @@ def login():
             if check_password(password, user[1]):
                 session["user_id"] = user[0]
                 session["ruolo"] = user[2]
-                return redirect(url_for("auth.login"))
+                if user[2] == 'admin':
+                    return redirect(url_for('admin.admin'))  # Reindirizza all'admin page
+                else:
+                    return redirect(url_for('userprenotazione'))  # Reindirizza alla pagina di login per gli utenti normali
             else:
                 return render_template("categoria/login.html", error="password errata")
         else:

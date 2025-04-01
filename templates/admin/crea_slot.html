@@ -1,0 +1,122 @@
+{% extends "basic/layout.html" %}
+{% block content %}
+
+<div class="d-flex">
+    {% include 'admin/sidebar.html' %}
+
+    <div class="container mt-3">
+        <div class="card">
+            <div class="card-body">
+                <h5 class="card-title">Gestione Slot Disponibili</h5>
+                <p class="card-text">Aggiungi slot per le prenotazioni.</p>
+                <div class="mb-3">
+                    <label for="dataSlot" class="form-label">Data:</label>
+                    <input type="date" id="dataSlot" name="data" class="form-control">
+                </div>
+                <div class="mb-3">
+                    <label for="oraInizioSlot" class="form-label">Ora Inizio (HH:MM):</label>
+                    <input type="time" id="oraInizioSlot" name="ora_inizio" class="form-control">
+                </div>
+                <div class="mb-3">
+                    <label for="oraFineSlot" class="form-label">Ora Fine (HH:MM):</label>
+                    <input type="time" id="oraFineSlot" name="ora_fine" class="form-control">
+                </div>
+                <div class="mb-3">
+                    <label for="servizioSlot" class="form-label">Servizio:</label>
+                    <select id="servizioSlot" name="servizio" class="form-control">
+                        {% for servizio in servizi %}
+                            <option value="{{ servizio['id'] }}">{{ servizio['Servizio'] }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <button onclick="aggiungiSlot()" class="btn btn-primary">Aggiungi Slot</button>
+                <ul id="orario" class="mt-3 list-group"></ul>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+    const dateInput = document.getElementById('dataSlot');
+    if (dateInput && dateInput.value) {
+        fetchTimeSlots(new Date(dateInput.value));
+    }
+});
+
+function aggiungiSlot() {
+    const servizioSlotElement = document.getElementById('servizioSlot');
+    if (!servizioSlotElement) {
+        console.error("Errore: elemento 'servizioSlot' non trovato.");
+        return;
+    }
+
+    const dataSlot = document.getElementById('dataSlot').value;
+    const oraInizioSlot = document.getElementById('oraInizioSlot').value;
+    const oraFineSlot = document.getElementById('oraFineSlot').value;
+    const servizioSlot = servizioSlotElement.value;
+
+    // Validazione input
+    if (!dataSlot || !oraInizioSlot || !oraFineSlot || !servizioSlot) {
+        alert("Compila tutti i campi prima di procedere.");
+        return;
+    }
+
+    const slotData = {
+        data: dataSlot,
+        ora_inizio: oraInizioSlot,
+        ora_fine: oraFineSlot,
+        servizio: servizioSlot,
+    };
+
+    fetch("{{ url_for('api.create_slot') }}", {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(slotData),
+    })
+    .then(response => {
+        if (!response.ok) {
+            return response.json().then(errorData => {
+                throw new Error(errorData.error || 'Errore durante la creazione dello slot');
+            });
+        }
+        return response.json();
+    })
+    .then(result => {
+        alert(result.message || "Slot creato con successo");
+        fetchTimeSlots(new Date(dataSlot));
+    })
+    .catch(error => {
+        alert(error.message || "Errore di rete durante l'aggiunta dello slot.");
+    });
+}
+
+function fetchTimeSlots(date) {
+    if (!(date instanceof Date) || isNaN(date.getTime())) {
+        console.error("Data non valida in fetchTimeSlots()");
+        return;
+    }
+
+    fetch(`/slot_prenotazione?data=${date.toISOString().split('T')[0]}`)
+        .then(response => {
+            if (!response.ok) {
+                return response.text().then(text => { throw new Error(text) });
+            }
+            return response.json();
+        })
+        .then(slots => {
+            let html = '';
+            slots.forEach(slot => {
+                html += `<li class="list-group-item">${slot.orario} - Servizio: ${slot.servizio_id}</li>`;
+            });
+            document.getElementById('orario').innerHTML = html;
+        })
+        .catch(error => {
+            console.error("Errore durante il recupero degli slot:", error);
+            alert("Errore durante il recupero degli slot: " + error.message);
+        });
+}
+</script>
+{% endblock %}
