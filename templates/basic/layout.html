@@ -15,7 +15,7 @@
     <nav class="navbar bg-body-tertiary">
   <div class="container-fluid">
     <a class="navbar-brand" href="/">
-      <img src="static/img/cicloverso_logo50x30.png" alt="Logo" class="d-inline-block align-text-top">
+      <img src="{{ url_for('static', filename='img/cicloverso_logo50x30.png') }}" alt="logo">
       CicloVerso | Passion for cycling
     </a>
   </div>
@@ -107,14 +107,12 @@
 
     {% block content %}
     {% endblock %}
-    {% if session.user_id %}
-    <h1 style="position: relative; ">Ciao {{ session.ruolo }}!</h1>
-{% endif %}
 <!--footer-->
     <footer class="container py-5">
   <div class="row">
     <div class="col-12 col-md">
-<img src="static/img/cicloverso_logo50x30.png" alt="Logo" class="d-inline-block align-text-top"><small class="d-block mb-3 text-body-secondary">©2024</small>
+      <img src="{{ url_for('static', filename='img/cicloverso_logo50x30.png') }}" alt="logo">
+<small class="d-block mb-3 text-body-secondary">©2024</small>
     </div>
     <div class="col-6 col-md">
       <h5>Features</h5>

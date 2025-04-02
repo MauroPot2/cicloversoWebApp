@@ -1,0 +1,45 @@
+{% extends "basic/layout.html" %}
+{% block content %}
+
+<div class="d-flex">
+  {% include 'utente/sidebar.html' %}
+
+  <div class="container mt-4">
+    <h2>Ciao {{ utente['nome'] }} 👋</h2>
+    <p>Benvenuto nella tua area personale.</p>
+
+    <div class="row mt-4">
+      <div class="col-md-4">
+        <div class="card border-primary shadow-sm">
+          <div class="card-body">
+            <h5 class="card-title">Le tue prenotazioni</h5>
+            <p class="card-text">Visualizza e gestisci le tue prenotazioni.</p>
+            <a href="{{ url_for('utente.visualizza_prenotazioni') }}" class="btn btn-primary btn-sm">Vai</a>
+          </div>
+        </div>
+      </div>
+
+      <div class="col-md-4">
+        <div class="card border-success shadow-sm">
+          <div class="card-body">
+            <h5 class="card-title">Prenota un servizio</h5>
+            <p class="card-text">Scegli giorno e orario e prenota in un click.</p>
+            <a href="{{ url_for('utente.calendario') }}" class="btn btn-success btn-sm">Prenota</a>
+          </div>
+        </div>
+      </div>
+
+      <div class="col-md-4">
+        <div class="card border-info shadow-sm">
+          <div class="card-body">
+            <h5 class="card-title">Il tuo profilo</h5>
+            <p class="card-text">Modifica le tue informazioni personali.</p>
+            <a href="{{ url_for('utente.profilo') }}" class="btn btn-info btn-sm">Modifica</a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+{% endblock %}

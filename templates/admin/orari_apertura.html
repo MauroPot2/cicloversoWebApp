@@ -1,0 +1,53 @@
+{% extends "basic/layout.html" %}
+{% block content %}
+
+<div class="d-flex">
+    {% include 'admin/sidebar.html' %}
+
+<div class="container mt-5">
+    <h2 class="mb-4">🕒 Modifica Orari di Apertura</h2>
+
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}
+        {% for category, message in messages %}
+          <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
+            {{ message }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+          </div>
+        {% endfor %}
+      {% endif %}
+    {% endwith %}
+
+    <form method="POST" action="{{ url_for('admin.salva_orari_apertura') }}">
+        <div class="row mb-3">
+            <div class="col-md-6">
+                <label class="form-label">Apertura Mattina</label>
+                <input type="time" class="form-control" name="apertura_mattina" value="{{ orari['apertura_mattina'] }}" required>
+            </div>
+            <div class="col-md-6">
+                <label class="form-label">Chiusura Mattina</label>
+                <input type="time" class="form-control" name="chiusura_mattina" value="{{ orari['chiusura_mattina'] }}" required>
+            </div>
+        </div>
+
+        <div class="row mb-3">
+            <div class="col-md-6">
+                <label class="form-label">Apertura Pomeriggio</label>
+                <input type="time" class="form-control" name="apertura_pomeriggio" value="{{ orari['apertura_pomeriggio'] }}" required>
+            </div>
+            <div class="col-md-6">
+                <label class="form-label">Chiusura Pomeriggio</label>
+                <input type="time" class="form-control" name="chiusura_pomeriggio" value="{{ orari['chiusura_pomeriggio'] }}" required>
+            </div>
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label">Durata Slot (minuti)</label>
+            <input type="number" class="form-control" name="durata_slot" value="{{ orari['durata_slot'] }}" min="5" required>
+        </div>
+
+        <button type="submit" class="btn btn-success">💾 Salva Modifiche</button>
+    </form>
+</div>
+</div>
+{% endblock %}

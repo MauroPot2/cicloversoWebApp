@@ -12,9 +12,10 @@ class Slot:
     def save(self):
         """Salva lo slot nel database."""
         conn = sqlite3.connect('usersdb.db')
+        conn.row_factory = sqlite3.Row
         cursor = conn.cursor()
         cursor.execute('''
-            INSERT OR IGNORE INTO slot (data, orario, ora_fine, servizio_id, disponibile)
+            INSERT OR IGNORE INTO slot (data, ora_inizio, ora_fine, servizio_id, disponibile)
             VALUES (?, ?, ?, ?, ?)
         ''', (
             self.data.isoformat(),
@@ -33,7 +34,7 @@ class Slot:
         conn.row_factory = sqlite3.Row
         cursor = conn.cursor()
         cursor.execute('''
-            SELECT orario, ora_fine, servizio_id, disponibile
+            SELECT ora_inizio, ora_fine, servizio_id, disponibile
             FROM slot
             WHERE data = ?
         ''', (data.isoformat(),))
@@ -44,7 +45,7 @@ class Slot:
         for row in rows:
             slots.append(Slot(
                 data=data,
-                ora_inizio=datetime.strptime(row['orario'], '%H:%M:%S').time(),
+                ora_inizio=datetime.strptime(row['ora_inizio'], '%H:%M:%S').time(),
                 ora_fine=datetime.strptime(row['ora_fine'], '%H:%M:%S').time(),
                 servizio_id=row['servizio_id'],
                 disponibile=bool(row['disponibile'])
@@ -58,7 +59,7 @@ class Slot:
         conn.row_factory = sqlite3.Row
         cursor = conn.cursor()
         cursor.execute('''
-            SELECT orario, ora_fine, servizio_id
+            SELECT ora_inizio, ora_fine, servizio_id
             FROM slot
             WHERE data = ? AND disponibile = 1
         ''', (data.isoformat(),))
@@ -69,7 +70,7 @@ class Slot:
         for row in rows:
             slots.append(Slot(
                 data=data,
-                ora_inizio=datetime.strptime(row['orario'], '%H:%M:%S').time(),
+                ora_inizio=datetime.strptime(row['ora_inizio'], '%H:%M:%S').time(),
                 ora_fine=datetime.strptime(row['ora_fine'], '%H:%M:%S').time(),
                 servizio_id=row['servizio_id'],
                 disponibile=True

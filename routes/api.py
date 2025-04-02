@@ -1,5 +1,6 @@
 from flask import Blueprint, jsonify, request
 from datetime import datetime
+from dateutil.parser import parse
 import sqlite3
 from slot import Slot
 
@@ -19,21 +20,43 @@ def get_servizi():
     conn.close()
     return jsonify([{'id': s['id'], 'nome': s['nome']} for s in servizi])
 
-# ✅ Recupera slot disponibili per una data
+# ✅ Recupera slot disponibili
 @api_bp.route('/slot', methods=['GET'])
 def get_slots():
-    data_str = request.args.get('data')
-    if not data_str:
-        return jsonify({'error': 'Parametro "data" mancante'}), 400
+    start_str = request.args.get('start')
+    end_str = request.args.get('end')
+
+    if not start_str or not end_str:
+        return jsonify({'error': 'Parametri "start" e "end" mancanti'}), 400
+
     try:
-        data_obj = datetime.strptime(data_str, '%Y-%m-%d').date()
-        slots = Slot.get_available_slots_by_date(data_obj)
-        return jsonify([{
-            'orario': slot.orario.strftime('%H:%M'),
-            'servizio_id': slot.servizio_id
-        } for slot in slots]), 200
+        # Usa parse per supportare timezone e orario
+        start_date = parse(start_str).date()
+        end_date = parse(end_str).date()
     except Exception as e:
-        return jsonify({'error': str(e)}), 500
+        return jsonify({'error': f'Formato data non valido: {e}'}), 400
+
+    conn = sqlite3.connect('usersdb.db')
+    conn.row_factory = sqlite3.Row
+    cur = conn.cursor()
+
+    cur.execute('''
+        SELECT data, ora_inizio, ora_fine, servizio_id
+        FROM slot
+        WHERE data BETWEEN ? AND ? AND disponibile = 1
+    ''', (start_date.isoformat(), end_date.isoformat()))
+    rows = cur.fetchall()
+    conn.close()
+
+    events = []
+    for row in rows:
+        events.append({
+            "title": f"Servizio {row['servizio_id']}",
+            "start": f"{row['data']}T{row['ora_inizio']}",
+            "end": f"{row['data']}T{row['ora_fine']}"
+        })
+
+    return jsonify(events)
 
 # ✅ Crea uno slot disponibile
 @api_bp.route('/slot', methods=['POST'])
@@ -47,9 +70,9 @@ def create_slot():
 
         conn = get_db_connection()
         conn.execute("""
-            INSERT INTO slot (data, orario_inizio, orario_fine, servizio_id, disponibile)
-            VALUES (?, ?, ?, 1)
-        """, (giorno.isoformat(), ora_inizio.isoformat(), servizio_id))
+            INSERT INTO slot (data, ora_inizio, ora_fine, servizio_id, disponibile)
+            VALUES (?, ?, ?, ?, 1)
+        """, (giorno.isoformat(), ora_inizio.isoformat(), ora_fine.isoformat(), servizio_id))
         conn.commit()
         conn.close()
 
@@ -63,7 +86,8 @@ def prenota_slot():
     data = request.get_json()
     try:
         giorno = datetime.strptime(data['data'], '%Y-%m-%d').date()
-        orario = datetime.strptime(data['orario'], '%H:%M').time()
+        ora_inizio = datetime.strptime(data['ora_inizio'], '%H:%M').time()
+        ora_fine = datetime.strptime(data['ora_fine'], '%H:%M').time()
         servizio_id = int(data['servizio_id'])
 
         conn = get_db_connection()
@@ -71,8 +95,13 @@ def prenota_slot():
         cur.execute("""
             UPDATE slot
             SET disponibile = 0
-            WHERE data = ? AND orario = ? AND servizio_id = ? AND disponibile = 1
-        """, (giorno.isoformat(), orario.isoformat(), servizio_id))
+            WHERE data = ? AND ora_inizio = ? AND ora_fine = ? AND servizio_id = ? AND disponibile = 1
+        """, (
+            giorno.isoformat(),
+            ora_inizio.isoformat(),
+            ora_fine.isoformat(),
+            servizio_id
+        ))
         if cur.rowcount == 0:
             raise Exception("Nessuno slot disponibile per questi parametri.")
         conn.commit()

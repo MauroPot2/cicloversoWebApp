@@ -1,4 +1,5 @@
 from flask import Blueprint, render_template, request, session, redirect, url_for, flash, jsonify
+from utils.email_utils import invia_mail_benvenuto
 import sqlite3
 import bcrypt
 import re
@@ -35,7 +36,7 @@ def login():
                 if user[2] == 'admin':
                     return redirect(url_for('admin.admin'))  # Reindirizza all'admin page
                 else:
-                    return redirect(url_for('userprenotazione'))  # Reindirizza alla pagina di login per gli utenti normali
+                    return redirect(url_for('utente.dashboard_utente'))  # Reindirizza alla pagina di login per gli utenti normali
             else:
                 return render_template("categoria/login.html", error="password errata")
         else:
@@ -99,7 +100,7 @@ def registrati():
         try:
             conn = sqlite3.connect('usersdb.db')
             cursore = conn.cursor()
-
+    
             # Verifica email esistente
             cursore.execute("SELECT id FROM utenti WHERE email = ?", (email,))
             if cursore.fetchone():
@@ -114,13 +115,21 @@ def registrati():
 
             # Inserisci il nuovo utente con password hashata
             hashed_password = hash_password(password)
-            cursore.execute("INSERT INTO utenti (nome, cognome, email, cellulare, hash_password) VALUES (?, ?, ?, ?, ?)", (nome, cognome, email, cellulare, hashed_password))
+            cursore.execute(
+                "INSERT INTO utenti (nome, cognome, email, cellulare, hash_password) VALUES (?, ?, ?, ?, ?)",
+                (nome, cognome, email, cellulare, hashed_password)
+            )
             conn.commit()
-            print(f"Righe inserite: {cursore.rowcount}")
-            print(f"Ultimo ID inserito: {cursore.lastrowid}")
+
+            # ✉️ Invia la mail di benvenuto
+            try:
+                invia_mail_benvenuto(email, nome)
+            except Exception as e:
+                print(f"Errore nell'invio della mail di benvenuto: {e}")
+
             flash('Registrazione avvenuta con successo. Effettua il login.', 'success')
             return redirect(url_for('login'))
-
+            
         except sqlite3.IntegrityError as e:
             if "UNIQUE constraint failed: utenti.email" in str(e):
                 flash("Email già registrata.", "danger")

@@ -1,26 +1,71 @@
 {% extends "basic/layout.html" %}
 {% block content %}
-
 <div class="d-flex">
-    {% include 'admin/sidebar.html' %} 
+  {% include 'admin/sidebar.html' %}
 
-    <div class="container">
-        <div class="row">
-            <div class="col-md-4">
+  <div class="container mt-4">
+    <h2>Gestione Prenotazioni</h2>
+
+    <!-- Ricerca -->
+    <form method="GET" action="{{ url_for('admin.gestisci_prenotazioni') }}" class="input-group mb-3">
+      <input type="text" name="search" class="form-control" placeholder="Cerca per utente o email" value="{{ search or '' }}">
+      <button class="btn btn-outline-secondary" type="submit">Cerca</button>
+    </form>
+
+    <table class="table table-bordered table-hover">
+      <thead class="table-dark">
+        <tr>
+          <th>Data</th>
+          <th>Servizio</th>
+          <th>Utente</th>
+          <th>Email</th>
+          <th>Azioni</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for p in prenotazioni %}
+        <tr>
+          <td>{{ p['data_ora'] }}</td>
+          <td>{{ p['Servizio'] }}</td>
+          <td>{{ p['nome'] }} {{ p['cognome'] }}</td>
+          <td>{{ p['email'] }}</td>
+          <td>
+            <!-- Bottone modifica -->
+            <a href="{{ url_for('admin.modifica_prenotazione', prenotazione_id=p['id']) }}" class="btn btn-sm btn-warning">
+              <i class="bi bi-pencil-square"></i> Modifica
+            </a>
+
+            <!-- Bottone elimina con modale -->
+            <button class="btn btn-sm btn-danger" data-bs-toggle="modal" data-bs-target="#confermaElimina{{ p['id'] }}">
+              <i class="bi bi-trash"></i> Annulla
+            </button>
+
+            <!-- Modale conferma -->
+            <div class="modal fade" id="confermaElimina{{ p['id'] }}" tabindex="-1" aria-labelledby="eliminaLabel{{ p['id'] }}" aria-hidden="true">
+              <div class="modal-dialog">
+                <div class="modal-content">
+                  <div class="modal-header bg-danger text-white">
+                    <h5 class="modal-title" id="eliminaLabel{{ p['id'] }}">Conferma Annullamento</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                  </div>
+                  <div class="modal-body">
+                    Sei sicuro di voler annullare la prenotazione per <strong>{{ p['nome'] }} {{ p['cognome'] }}</strong> il giorno <strong>{{ p['data_ora'] }}</strong>?
+                  </div>
+                  <div class="modal-footer">
+                    <form action="{{ url_for('admin.elimina_prenotazione', prenotazione_id=p['id']) }}" method="POST">
+                      <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annulla</button>
+                      <button type="submit" class="btn btn-danger">Conferma</button>
+                    </form>
+                  </div>
                 </div>
-            <div class="col-md-8">
-                <h2>Orari Disponibili</h2>
-                <ul id="orario" class="list-group">
-                    </ul>
-                <div id="slotDetails">
-                    </div>
-                <button id="prenotaButton" class="btn btn-primary">Prenota</button>
+              </div>
             </div>
-        </div>
-    </div>
+
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
 </div>
-
-<script src="{{ url_for('static', filename='js/calendarscript.js') }}"></script>
-<script src="{{ url_for('static', filename='js/prenotazione.js') }}"></script>
-
 {% endblock %}

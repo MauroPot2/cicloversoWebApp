@@ -1,0 +1,57 @@
+{% extends "basic/layout.html" %}
+{% block content %}
+
+<div class="d-flex">
+  {% include 'admin/sidebar.html' %}
+
+  <div class="container mt-4">
+    <h2>
+      {% if servizio %}
+        Modifica Servizio
+      {% else %}
+        Aggiungi Nuovo Servizio
+      {% endif %}
+    </h2>
+
+    <form method="POST" enctype="multipart/form-data"
+          action="{% if servizio %}{{ url_for('admin.modifica_servizio', servizio_id=servizio['id']) }}{% else %}{{ url_for('admin.aggiungi_servizio') }}{% endif %}">
+
+      <div class="mb-3">
+        <label for="nome" class="form-label">Nome Servizio</label>
+        <input type="text" class="form-control" id="nome" name="nome"
+               value="{{ servizio['Servizio'] if servizio else '' }}" required>
+      </div>
+
+      <div class="mb-3">
+        <label for="prezzo" class="form-label">Prezzo (€)</label>
+        <input type="number" class="form-control" id="prezzo" name="prezzo" min="0"
+               value="{{ servizio['Prezzo'] if servizio else '' }}" required>
+      </div>
+
+      <div class="mb-3">
+        <label for="disponibilita" class="form-label">Disponibilità</label>
+        <input type="number" class="form-control" id="disponibilita" name="disponibilita" min="1"
+               value="{{ servizio['Disponibilitá'] if servizio else 1 }}" required>
+      </div>
+
+      <div class="mb-3">
+        <label for="immagine" class="form-label">Immagine</label>
+        {% if servizio %}
+          <div class="mb-2">
+            <img src="/{{ servizio['immagine'] }}" width="100" alt="Immagine esistente">
+            <p class="text-muted">Carica una nuova immagine per sostituire quella esistente</p>
+          </div>
+        {% endif %}
+        <input type="file" class="form-control" name="immagine" id="immagine" accept="image/*">
+      </div>
+
+      <button type="submit" class="btn btn-primary">
+        {% if servizio %} Salva Modifiche {% else %} Aggiungi Servizio {% endif %}
+      </button>
+
+      <a href="{{ url_for('admin.gestisci_servizi') }}" class="btn btn-secondary ms-2">Annulla</a>
+    </form>
+  </div>
+</div>
+
+{% endblock %}

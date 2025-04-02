@@ -34,15 +34,11 @@ os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 # Registrazione dei blueprint
 from routes.admin import admin_bp
 from routes.auth import auth_bp
-from routes.servizi import servizi_bp
-from routes.prenotazioni import prenotazioni_bp
 from routes.api import api_bp
 from routes.user import user_bp
 
 app.register_blueprint(admin_bp, url_prefix='/admin')
 app.register_blueprint(auth_bp, mail=mail)
-app.register_blueprint(servizi_bp, url_prefix='/admin')
-app.register_blueprint(prenotazioni_bp)
 app.register_blueprint(api_bp, url_prefix='/api')
 app.register_blueprint(user_bp, url_prefix='/utente')
 

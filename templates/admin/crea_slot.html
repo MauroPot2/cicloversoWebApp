@@ -99,7 +99,13 @@ function fetchTimeSlots(date) {
         return;
     }
 
-    fetch(`/slot_prenotazione?data=${date.toISOString().split('T')[0]}`)
+    // Costruzione range di 1 giorno
+    const startStr = date.toISOString().split('T')[0];
+    const endDate = new Date(date);
+    endDate.setDate(endDate.getDate() + 1);  // un giorno dopo
+    const endStr = endDate.toISOString().split('T')[0];
+
+    fetch(`/api/slot?start=${startStr}&end=${endStr}`)
         .then(response => {
             if (!response.ok) {
                 return response.text().then(text => { throw new Error(text) });
@@ -109,7 +115,7 @@ function fetchTimeSlots(date) {
         .then(slots => {
             let html = '';
             slots.forEach(slot => {
-                html += `<li class="list-group-item">${slot.orario} - Servizio: ${slot.servizio_id}</li>`;
+                html += `<li class="list-group-item">${slot.start.split('T')[1]} - ${slot.end.split('T')[1]} | ${slot.title}</li>`;
             });
             document.getElementById('orario').innerHTML = html;
         })
