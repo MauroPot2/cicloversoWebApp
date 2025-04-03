@@ -1,5 +1,6 @@
-from flask import Blueprint, render_template, request, session, redirect, url_for, flash, jsonify
+from flask import Blueprint, render_template, request, session, redirect, url_for, flash, jsonify, render_template_string
 from utils.email_utils import invia_mail_benvenuto
+from extension import mail
 import sqlite3
 import bcrypt
 import re
@@ -129,7 +130,7 @@ def registrati():
                 print(f"Errore nell'invio della mail di benvenuto: {e}")
 
             flash('Registrazione avvenuta con successo. Effettua il login.', 'success')
-            return redirect(url_for('login'))
+            return redirect(url_for('auth.login'))
             
         except sqlite3.IntegrityError as e:
             if "UNIQUE constraint failed: utenti.email" in str(e):
@@ -156,46 +157,56 @@ def registrati():
 
     return render_template('categoria/registrazione.html')
 
-@auth_bp.route('/reimposta_password', methods=['POST', 'GET'])
-def reimposta_password(mail):
+@auth_bp.route('/reimposta_password', methods=['GET', 'POST'])
+def reimposta_password():
     if request.method == 'POST':
-        email = request.form.get('email')
-        conn = sqlite3.connect('usersdb.db')
-        cursore = conn.cursor()
-        cursore.execute("SELECT id FROM utenti WHERE email = ?", (email,))
-        user = cursore.fetchone()
-        if user:
-            token = secrets.token_urlsafe(16)
-            cursore.execute("UPDATE utenti SET reset_token = ? WHERE id = ?", (token, user[0]))
-            conn.commit()
-            conn.close()
-            msg = Message('Reimposta la tua password', sender='your_email@example.com', recipients=[email])
-            msg.body = f'Clicca sul seguente link per reimpostare la tua password: {url_for("reimposta_password_token", token=token, _external=True)}'
-            mail.send(msg)
-            flash('Ti è stata inviata un\'email con le istruzioni per reimpostare la password.', 'info')
-            return redirect(url_for('login'))
-        else:
-            flash('Email non trovata.', 'danger')
-    return render_template('categoria/reimposta_password.html')
+        email = request.form.get('email', '').strip()
 
-@auth_bp.route('/reimposta_password/<token>', methods=['POST', 'GET'])
-def reimposta_password_token(token, mail):
-    conn = sqlite3.connect('usersdb.db')
-    cursore = conn.cursor()
-    cursore.execute("SELECT id FROM utenti WHERE reset_token = ?", (token,))
-    user = cursore.fetchone()
-    if not user:
-        flash('Token non valido.', 'danger')
-        return redirect(url_for('login'))
-    if request.method == 'POST':
-        password = request.form.get('password')
-        if not is_strong_password(password):
-            flash('Password non valida.', 'danger')
-            return render_template('categoria/reimposta_password_token.html', token=token)
-        hashed_password = hash_password(password)
-        cursore.execute("UPDATE utenti SET password = ?, reset_token = NULL WHERE id = ?", (hashed_password, user[0]))
+        if not email:
+            flash("Inserisci un'email valida.", "danger")
+            return render_template('categoria/reimposta_password.html')
+
+        conn = sqlite3.connect('usersdb.db')
+        conn.row_factory = sqlite3.Row
+        cur = conn.cursor()
+
+        cur.execute("SELECT id FROM utenti WHERE email = ?", (email,))
+        user = cur.fetchone()
+
+        if not user:
+            flash("Nessun utente trovato con questa email.", "danger")
+            conn.close()
+            return render_template('categoria/reimposta_password.html')
+
+        #Genera token sicuro e salva nel DB
+        token = secrets.token_urlsafe(32)
+        cur.execute("UPDATE utenti SET reset_token = ? WHERE id = ?", (token, user['id']))
         conn.commit()
         conn.close()
-        flash('Password reimpostata con successo.', 'success')
-        return redirect(url_for('login'))
-    return render_template('categoria/reimposta_password_token.html', token=token)
+
+        #Link per reimpostare la password
+        reset_link = url_for('auth.reimposta_password', token=token, _external=True)
+
+        #Invia email con il link di reset
+        try:
+            msg = Message(
+                subject="Reimposta la tua password - CicloVerso",
+                sender="noreply@cicloverso.com",
+                recipients=[email]
+            )
+            msg.body = f"""
+Hai richiesto la reimpostazione della password per il tuo account CicloVerso.
+
+Clicca il link qui sotto per reimpostarla:
+
+{reset_link}
+
+Se non hai richiesto questa operazione, ignora semplicemente questa email.
+            """.strip()
+            mail.send(msg)
+            flash("Email inviata! Controlla la tua casella di posta. 📬", "success")
+        except Exception as e:
+            flash("Errore durante l'invio dell'email. Riprova più tardi.", "danger")
+            print(f"Errore invio email reset: {e}")
+
+    return render_template("categoria/reimposta_password.html")

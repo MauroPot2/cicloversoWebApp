@@ -1,102 +1,129 @@
 {% extends "basic/layout.html" %}
 
 {% block content %}
-<div class="container mt-5">
-    <div class="row justify-content-center">
-        <div class="col-md-8">
-            <h2 class="mb-4">Registrazione</h2>
-            <form id="registrazione-form" class="row g-3" method="POST" action="/registrati">
-                <div class="col-md-6">
-                    <label for="inputNome" class="form-label">Nome</label>
-                    <input type="text" class="form-control" id="inputNome" name="nome" value="{{ request.form.nome if request.form.nome }}" required>
-                    <div id="nome-errore" class="invalid-feedback"></div>
+<div class="container py-5">
+  <div class="row justify-content-center">
+    <div class="col-lg-7 col-md-10 col-sm-12">
+      <div class="card shadow border-0 rounded-4">
+        <div class="card-body px-4 py-5">
+
+          <div class="text-center mb-4">
+            <h2 class="fw-bold">Crea il tuo account CicloVerso</h2>
+            <p class="text-muted">Unisciti alla nostra community di appassionati ciclisti! 🚴‍♀️🚴‍♂️</p>
+          </div>
+
+          <form id="registrazione-form" method="POST" action="{{ url_for('auth.registrati') }}" novalidate>
+            <div class="row g-3">
+              <div class="col-md-6">
+                <label for="inputNome" class="form-label">Nome *</label>
+                <input type="text" class="form-control form-control-lg" id="inputNome" name="nome" placeholder="Inserisci il tuo nome" required>
+                <div class="invalid-feedback">Inserisci il tuo nome.</div>
+              </div>
+
+              <div class="col-md-6">
+                <label for="inputCognome" class="form-label">Cognome *</label>
+                <input type="text" class="form-control form-control-lg" id="inputCognome" name="cognome" placeholder="Inserisci il tuo cognome" required>
+                <div class="invalid-feedback">Inserisci il tuo cognome.</div>
+              </div>
+
+              <div class="col-md-6">
+                <label for="inputEmail4" class="form-label">Email *</label>
+                <input type="email" class="form-control form-control-lg" id="inputEmail4" name="email" placeholder="esempio@mail.com" required>
+                <div class="invalid-feedback">Inserisci un indirizzo email valido.</div>
+              </div>
+
+              <div class="col-md-6">
+                <label for="inputCellulare" class="form-label">Cellulare *</label>
+                <input type="tel" class="form-control form-control-lg" id="inputCellulare" name="cellulare" placeholder="+391234567890" required>
+                <div class="invalid-feedback">Inserisci un numero valido (es: +391234567890).</div>
+              </div>
+
+              <div class="col-12">
+                <label for="inputPassword" class="form-label">Password *</label>
+                <input type="password" class="form-control form-control-lg" id="inputPassword" name="password" placeholder="Crea una password sicura" required>
+                <div class="form-text">
+                  La password deve contenere almeno 8 caratteri, inclusi almeno una lettera maiuscola, un numero e un simbolo speciale (! @ # $ % ^ & *).
                 </div>
-                <div class="col-md-6">
-                    <label for="inputCognome" class="form-label">Cognome</label>
-                    <input type="text" class="form-control" id="inputCognome" name="cognome" value="{{ request.form.cognome if request.form.cognome }}" required>
-                    <div id="cognome-errore" class="invalid-feedback"></div>
-                </div>
-                <div class="col-md-6">
-                    <label for="inputEmail4" class="form-label">Email</label>
-                    <input type="email" class="form-control" id="inputEmail4" name="email" value="{{ request.form.email if request.form.email }}" required>
-                    <div id="email-errore" class="invalid-feedback"></div>
-                </div>
-                <div class="col-md-6">
-                    <label for="inputCellulare" class="form-label">Cellulare</label>
-                    <input type="tel" class="form-control" id="inputCellulare" name="cellulare" value="{{ request.form.cellulare if request.form.cellulare }}" required>
-                    <div id="cellulare-errore" class="invalid-feedback"></div>
-                </div>
-                <div class="col-md-6">
-                    <label for="inputPassword" class="form-label">Password</label>
-                    <input type="password" class="form-control" id="inputPassword" name="password" required>
-                    <div id="password-errore" class="invalid-feedback"></div>
-                </div>
-                <div class="col-12">
-                    <button type="submit" class="btn btn-primary">Registrati</button>
-                </div>
-            </form>
+                <div class="invalid-feedback">La password non soddisfa i requisiti.</div>
+              </div>
+
+              <div class="col-12 text-center mt-4">
+                <button type="submit" class="btn btn-success btn-lg w-100">Registrati ora</button>
+              </div>
+            </div>
+          </form>
+
+          <div class="text-center mt-3">
+            <p>Hai già un account? <a href="{{ url_for('auth.login') }}">Accedi qui</a></p>
+          </div>
+
         </div>
+      </div>
     </div>
+  </div>
 </div>
 
 <script>
-    document.getElementById('registrazione-form').addEventListener('submit', function(event) {
-        let nome = document.getElementById('inputNome');
-        let cognome = document.getElementById('inputCognome');
-        let email = document.getElementById('inputEmail4');
-        let cellulare = document.getElementById('inputCellulare');
-        let password = document.getElementById('inputPassword');
+  (() => {
+    'use strict'
 
-        let nomeValido = nome.value.trim() !== '';
-        let cognomeValido = cognome.value.trim() !== '';
-        let emailValido = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.value);
-        let cellulareValido = /^[0-9\+]+$/.test(cellulare.value);
-        let passwordValida = password.value.length >= 8 && /[!@#$%^&*]/.test(password.value);
+    const form = document.getElementById('registrazione-form');
 
-        if (!nomeValido) {
-            nome.classList.add('is-invalid');
-            document.getElementById('nome-errore').textContent = 'Campo obbligatorio.';
-            event.preventDefault();
-        } else {
-            nome.classList.remove('is-invalid');
-            document.getElementById('nome-errore').textContent = '';
-        }
+    form.addEventListener('submit', function(event) {
+      const nome = document.getElementById('inputNome');
+      const cognome = document.getElementById('inputCognome');
+      const email = document.getElementById('inputEmail4');
+      const cellulare = document.getElementById('inputCellulare');
+      const password = document.getElementById('inputPassword');
 
-        if (!cognomeValido) {
-            cognome.classList.add('is-invalid');
-            document.getElementById('cognome-errore').textContent = 'Campo obbligatorio.';
-            event.preventDefault();
-        } else {
-            cognome.classList.remove('is-invalid');
-            document.getElementById('cognome-errore').textContent = '';
-        }
+      // RegEx per validare
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      const cellulareRegex = /^[0-9\+]{9,15}$/;
+      const passwordRegex = /^(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*]).{8,}$/;
 
-        if (!emailValido) {
-            email.classList.add('is-invalid');
-            document.getElementById('email-errore').textContent = 'Formato email non valido.';
-            event.preventDefault();
-        } else {
-            email.classList.remove('is-invalid');
-            document.getElementById('email-errore').textContent = '';
-        }
+      let valido = true;
 
-        if (!cellulareValido) {
-            cellulare.classList.add('is-invalid');
-            document.getElementById('cellulare-errore').textContent = 'Formato cellulare non valido.';
-            event.preventDefault();
-        } else {
-            cellulare.classList.remove('is-invalid');
-            document.getElementById('cellulare-errore').textContent = '';
-        }
+      if(nome.value.trim() === ''){
+        nome.classList.add('is-invalid');
+        valido = false;
+      } else {
+        nome.classList.remove('is-invalid');
+      }
 
-        if (!passwordValida) {
-            password.classList.add('is-invalid');
-            document.getElementById('password-errore').textContent = 'Password non valida.';
-            event.preventDefault();
-        } else {
-            password.classList.remove('is-invalid');
-            document.getElementById('password-errore').textContent = '';
-        }
-    });
+      if(cognome.value.trim() === ''){
+        cognome.classList.add('is-invalid');
+        valido = false;
+      } else {
+        cognome.classList.remove('is-invalid');
+      }
+
+      if(!emailRegex.test(email.value)){
+        email.classList.add('is-invalid');
+        valido = false;
+      } else {
+        email.classList.remove('is-invalid');
+      }
+
+      if(!cellulareRegex.test(cellulare.value)){
+        cellulare.classList.add('is-invalid');
+        valido = false;
+      } else {
+        cellulare.classList.remove('is-invalid');
+      }
+
+      if(!passwordRegex.test(password.value)){
+        password.classList.add('is-invalid');
+        valido = false;
+      } else {
+        password.classList.remove('is-invalid');
+      }
+
+      if(!valido){
+        event.preventDefault();
+        event.stopPropagation();
+      }
+
+    }, false);
+  })()
 </script>
 {% endblock %}

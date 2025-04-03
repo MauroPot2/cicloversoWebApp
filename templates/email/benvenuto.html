@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <title>Benvenuto su CicloVerso</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            padding: 20px;
+            color: #333333;
+        }
+
+        .container {
+            max-width: 600px;
+            margin: auto;
+            background-color: #ffffff;
+            border-radius: 8px;
+            padding: 30px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+        }
+
+        .header {
+            text-align: center;
+            border-bottom: 2px solid #007bff;
+            margin-bottom: 30px;
+        }
+
+        .header img {
+            height: 50px;
+        }
+
+        .btn {
+            display: inline-block;
+            background-color: #007bff;
+            color: #ffffff;
+            text-decoration: none;
+            padding: 12px 20px;
+            border-radius: 5px;
+            margin-top: 20px;
+        }
+
+        .footer {
+            font-size: 0.9em;
+            text-align: center;
+            color: #888888;
+            margin-top: 40px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <img src="https://cicloverso.it/static/img/cicloverso_logo50x30.png" alt="CicloVerso Logo">
+            <h2>Benvenuto su CicloVerso!</h2>
+        </div>
+
+        <p>Ciao <strong>{{ nome }}</strong>,</p>
+        <p>Grazie per esserti unito alla nostra community di appassionati ciclisti!</p>
+
+        <p>Da oggi potrai:</p>
+        <ul>
+            <li>📅 Prenotare i tuoi interventi di manutenzione</li>
+            <li>🔧 Ricevere assistenza dai nostri meccanici esperti</li>
+            <li>🚴‍♀️ Tenere traccia delle tue prenotazioni</li>
+        </ul>
+
+        <p class="text-center">
+            <a class="btn" href="https://cicloverso.it/log_in">Accedi ora</a>
+        </p>
+
+        <div class="footer">
+            <p>Hai bisogno di aiuto? <a href="mailto:info@cicloverso.it">Contattaci</a></p>
+            <p>© 2024 CicloVerso - Tutti i diritti riservati.</p>
+        </div>
+    </div>
+</body>
+</html>

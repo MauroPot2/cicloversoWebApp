@@ -1,24 +1,56 @@
 {% extends "basic/layout.html" %}
 {% block content %}
-<form id="login" class="mx-auto w-25 p-3" method="POST" action="/log_in">
-  <div class="mb-3 ">
-    <label for="email" class="form-label">Email</label>
-    <input type="email" class="form-control" id="email" name="email" aria-describedby="emailHelp">
-    <div id="emailHelp" class="form-text">We'll never share your password with anyone else.</div>
-  </div>
-  <div class="mb-3">
-    <label for="password" class="form-label">Password</label>
-    <input type="password" class="form-control" id="password" name="password">
-  </div>
-  <div class="mb-3 form-check">
-    <input type="checkbox" class="form-check-input" id="exampleCheck1">
-    <label class="form-check-label" for="exampleCheck1">Ricordami</label>
-  </div>
-  <button type="submit" class="btn btn-primary">Accedi</button>
-  <h4>Non hai ancora un account?</h4>
-  <a href="/registrati"><button type="button" class="btn btn-primary mx-auto">Registrati</button></a>
-</form>
-{% if error %}
-    <p style="color: red;">{{ error }}</p>
-{% endif %}
+
+<div class="container py-5">
+    <div class="row justify-content-center align-items-center">
+        <div class="col-lg-5 col-md-8 col-sm-10">
+            <div class="card shadow-lg border-0 rounded-3">
+                <div class="card-body p-4 p-sm-5">
+
+                    <div class="text-center mb-4">
+                        <img src="{{ url_for('static', filename='img/cicloverso_logo50x30.png') }}" class="mb-3" alt="CicloVerso Logo">
+                        <h2 class="fw-bold">Bentornato!</h2>
+                        <p class="text-muted">Accedi per continuare</p>
+                    </div>
+
+                    <form method="POST" action="{{ url_for('auth.login') }}">
+                        <div class="mb-3">
+                            <label for="email" class="form-label">Indirizzo Email</label>
+                            <input type="email" class="form-control form-control-lg" id="email" name="email" placeholder="nome@example.com" required autofocus>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="password" class="form-label">Password</label>
+                            <input type="password" class="form-control form-control-lg" id="password" name="password" placeholder="Inserisci la tua password" required>
+                        </div>
+
+                        <div class="form-check mb-3">
+                            <input class="form-check-input" type="checkbox" id="ricordami">
+                            <label class="form-check-label" for="ricordami">
+                                Ricordami
+                            </label>
+                        </div>
+
+                        <button type="submit" class="btn btn-primary btn-lg w-100 mb-3">Accedi</button>
+
+                        <div class="text-center">
+                            <p class="mb-1"><a href="{{ url_for('auth.reimposta_password') }}" class="text-decoration-none">Hai dimenticato la password?</a></p>
+                            <hr class="my-4">
+                            <p>Non hai ancora un account?</p>
+                            <a href="{{ url_for('auth.registrati') }}" class="btn btn-outline-secondary btn-lg w-100">Registrati ora!</a>
+                        </div>
+                    </form>
+
+                    {% if error %}
+                    <div class="alert alert-danger mt-3 text-center" role="alert">
+                        {{ error }}
+                    </div>
+                    {% endif %}
+
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
 {% endblock %}

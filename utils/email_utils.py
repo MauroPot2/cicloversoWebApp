@@ -1,31 +1,12 @@
-from flask import current_app
+from flask import current_app, render_template
 from flask_mail import Message
+from extension import mail
 from config import MAIL_USERNAME
 
-def invia_mail_benvenuto(email_destinatario, nome, mail=None):
-    if not mail:
-        mail = current_app.extensions.get('mail')
-
-    if not mail:
-        raise RuntimeError("Il servizio mail non è disponibile.")
-
-    msg = Message(
-        subject="🎉 Benvenuto su Cicloverso!",
-        sender=MAIL_USERNAME,
-        recipients=[email_destinatario]
-    )
-
-    msg.body = f"""
-Ciao {nome},
-
-Benvenuto su Cicloverso! 🚴‍♂️
-
-Siamo felici di averti con noi. Da oggi potrai gestire le tue prenotazioni con semplicità e velocità.
-
-A presto,
-Il team Cicloverso
-"""
-
+def invia_mail_benvenuto(email, nome):
+    msg = Message("Benvenuto su CicloVerso 🚴", sender="noreply@cicloverso.it", recipients=[email])
+    msg.body = f"Ciao {nome}, grazie per esserti registrato su CicloVerso!"
+    msg.html = render_template("email/benvenuto.html", nome=nome)
     mail.send(msg)
 
 def invia_mail_modifica_prenotazione(email, nome, nuova_data):
