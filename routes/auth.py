@@ -48,13 +48,14 @@ def logout():
     session.pop("user_id", None)
     return redirect(url_for('index'))
 
-def hash_password(password):
-    salt = bcrypt.gensalt()
-    hashed_password = bcrypt.hashpw(password.encode('utf-8'), salt)
-    return hashed_password
+def hash_password(password: str) -> str:
+    hashed = bcrypt.hashpw(password.encode('utf-8'), bcrypt.gensalt())
+    return hashed.decode('utf-8')
 
-def check_password(password, hashed_password):
-   return bcrypt.checkpw(password.encode('utf-8'), hashed_password)
+def check_password(password: str, hashed_password: str) -> bool:
+    if isinstance(hashed_password, str):
+        hashed_password = hashed_password.encode('utf-8')
+    return bcrypt.checkpw(password.encode('utf-8'), hashed_password)
 
 def is_strong_password(password):
     if len(password) < 8:

@@ -72,6 +72,14 @@ def userprenotazione():
 def profiloUtente():
     return render_template("categoria/profilo.html")
 
+@app.template_filter('datetimeformat')
+def datetimeformat(value, format='%d/%m/%Y'):
+    try:
+        from datetime import datetime
+        return datetime.strptime(value, '%Y-%m-%d').strftime(format)
+    except:
+        return value
+
 
 
 if __name__ == '__main__':

@@ -1,0 +1,54 @@
+{% extends "basic/layout.html" %}
+{% block content %}
+
+<div class="d-flex">
+  {% include 'utente/sidebar.html' %}
+  
+  <div class="container mt-4">
+    <h2>Il tuo Profilo</h2>
+    <p>Qui puoi aggiornare i tuoi dati personali.</p>
+
+    <form method="POST" action="{{ url_for('utente.profilo') }}">
+      <div class="mb-3">
+        <label for="nome" class="form-label">Nome</label>
+        <input type="text" class="form-control" id="nome" name="nome" value="{{ utente['nome'] }}" required>
+      </div>
+
+      <div class="mb-3">
+        <label for="cognome" class="form-label">Cognome</label>
+        <input type="text" class="form-control" id="cognome" name="cognome" value="{{ utente['cognome'] }}" required>
+      </div>
+
+      <div class="mb-3">
+        <label for="email" class="form-label">Email</label>
+        <input type="email" class="form-control" id="email" name="email" value="{{ utente['email'] }}" required>
+      </div>
+
+      <div class="mb-3">
+        <label for="cellulare" class="form-label">Cellulare</label>
+        <input type="text" class="form-control" id="cellulare" name="cellulare" value="{{ utente['cellulare'] }}" required>
+      </div>
+
+      <button type="submit" class="btn btn-primary">Aggiorna</button>
+    </form>
+    <hr class="my-5">
+<h4>Modifica Password</h4>
+<form method="POST" action="{{ url_for('utente.cambia_password') }}">
+  <div class="mb-3">
+    <label for="vecchia_password" class="form-label">Password attuale</label>
+    <input type="password" class="form-control" id="vecchia_password" name="vecchia_password" required>
+  </div>
+  <div class="mb-3">
+    <label for="nuova_password" class="form-label">Nuova password</label>
+    <input type="password" class="form-control" id="nuova_password" name="nuova_password" required>
+  </div>
+  <div class="mb-3">
+    <label for="conferma_password" class="form-label">Conferma nuova password</label>
+    <input type="password" class="form-control" id="conferma_password" name="conferma_password" required>
+  </div>
+  <button type="submit" class="btn btn-warning">Aggiorna Password</button>
+</form>
+  </div>
+</div>
+
+{% endblock %}

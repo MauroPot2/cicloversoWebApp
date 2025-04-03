@@ -45,15 +45,20 @@ def gestisci_prenotazioni():
     conn = sqlite3.connect('usersdb.db')
     conn.row_factory = sqlite3.Row
     prenotazioni = conn.execute('''
-        SELECT p.id, p.data_ora, u.nome, u.cognome, u.email, s.Servizio
+        SELECT 
+            p.id AS prenotazione_id,
+            u.nome, u.cognome, u.email,
+            s.Servizio,
+            sl.data, sl.ora_inizio, sl.ora_fine
         FROM prenotazione p
         JOIN utenti u ON p.utente_id = u.id
-        JOIN servizi s ON p.servizio_id = s.id
-        ORDER BY p.data_ora DESC
+        JOIN slot sl ON p.slot_id = sl.id
+        JOIN servizi s ON sl.servizio_id = s.id
+        ORDER BY sl.data DESC, sl.ora_inizio
     ''').fetchall()
     conn.close()
     return render_template('admin/prenotazioni.html', prenotazioni=prenotazioni)
-
+    
 
 ###GESTIONE UTENTI
 @admin_bp.route('/utenti', methods=['GET'])

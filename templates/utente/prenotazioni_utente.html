@@ -1,34 +1,34 @@
 {% extends "basic/layout.html" %}
 {% block content %}
-
-<div class="d-flex">
+<div class="d-flex flex-column flex-md-row">
   {% include 'utente/sidebar.html' %}
 
   <div class="container mt-4">
-    <h3>Le tue prenotazioni</h3>
+    <h2>Le tue prenotazioni</h2>
+
     {% if prenotazioni %}
-    <table class="table table-striped mt-3">
-      <thead>
-        <tr>
-          <th>Data</th>
-          <th>Ora</th>
-          <th>Servizio</th>
-        </tr>
-      </thead>
-      <tbody>
-        {% for p in prenotazioni %}
-        <tr>
-          <td>{{ p['data_ora'][:10] }}</td>
-          <td>{{ p['data_ora'][11:16] }}</td>
-          <td>{{ p['Servizio'] }}</td>
-        </tr>
+      <div class="row row-cols-1 row-cols-md-2 g-3">
+        {% for prenotazione in prenotazioni %}
+        <div class="col">
+          <div class="card shadow-sm">
+            <div class="card-body">
+              <h5 class="card-title">{{ prenotazione['Servizio'] }}</h5>
+              <p class="card-text">
+                📅 Data: {{ prenotazione['data'] }}<br>
+                🕒 Orario: {{ prenotazione['ora_inizio'] }} - {{ prenotazione['ora_fine'] }}<br>
+                💶 Prezzo: {{ prenotazione['Prezzo'] }} €
+              </p>
+              <span class="badge bg-success">Prenotato</span>
+            </div>
+          </div>
+        </div>
         {% endfor %}
-      </tbody>
-    </table>
+      </div>
     {% else %}
-      <p class="text-muted mt-3">Nessuna prenotazione trovata.</p>
+      <div class="alert alert-info mt-3">
+        Non hai ancora effettuato prenotazioni.
+      </div>
     {% endif %}
   </div>
 </div>
-
 {% endblock %}

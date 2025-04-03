@@ -1,16 +1,46 @@
 {% extends "basic/layout.html" %}
 {% block content %}
-<div class="d-flex">
+<div class="d-flex flex-column flex-md-row">
   {% include 'utente/sidebar.html' %}
   <div class="container mt-4">
-    <h2>Calendario delle Prenotazioni</h2>
-    <div id='calendar'></div>
+
+    <h2 class="text-center text-md-start">Calendario delle Prenotazioni</h2>
+
+    <!-- ✅ Alert per conferma prenotazione -->
+    <div id="alertPrenotazione" class="alert alert-success d-none mt-3" role="alert">
+      Prenotazione effettuata con successo! 🎉
+    </div>
+
+    <!-- 📅 Calendario -->
+    <div id='calendar' class="mt-4"></div>
   </div>
 </div>
 
-<!-- FullCalendar CSS/JS -->
+<!-- ✅ FullCalendar CSS/JS -->
 <link href="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.8/index.global.min.css" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.8/index.global.min.js"></script>
+
+<!-- ✅ Modale per prenotazione -->
+<div class="modal fade" id="modalePrenotazione" tabindex="-1" aria-labelledby="modalePrenotazioneLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content shadow">
+      <div class="modal-header bg-primary text-white">
+        <h5 class="modal-title" id="modalePrenotazioneLabel">Conferma Prenotazione</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Chiudi"></button>
+      </div>
+      <div class="modal-body">
+        <p><strong>Servizio:</strong> <span id="modalServizio"></span></p>
+        <p><strong>Inizio:</strong> <span id="modalInizio"></span></p>
+        <p><strong>Fine:</strong> <span id="modalFine"></span></p>
+        <input type="hidden" id="hiddenSlotId">
+      </div>
+      <div class="modal-footer d-flex justify-content-between">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annulla</button>
+        <button type="button" class="btn btn-success" onclick="confermaPrenotazione()">Conferma</button>
+      </div>
+    </div>
+  </div>
+</div>
 
 <script>
 document.addEventListener('DOMContentLoaded', function () {
@@ -19,27 +49,76 @@ document.addEventListener('DOMContentLoaded', function () {
   const calendar = new FullCalendar.Calendar(calendarEl, {
     initialView: 'dayGridMonth',
     locale: 'it',
+    height: 'auto',
     headerToolbar: {
       left: 'prev,next today',
       center: 'title',
       right: 'dayGridMonth,timeGridWeek'
     },
     events: function(fetchInfo, successCallback, failureCallback) {
-  fetch(`/api/slot?start=${fetchInfo.startStr}&end=${fetchInfo.endStr}`)
-    .then(response => response.json())
-    .then(data => successCallback(data))
-    .catch(error => {
-      console.error('Errore nel recupero degli slot:', error);
-      failureCallback(error);
-    });
-},
+      fetch(`/api/slot?start=${fetchInfo.startStr}&end=${fetchInfo.endStr}`)
+        .then(response => response.json())
+        .then(data => {
+          const events = data.map(slot => ({
+            id: slot.id,
+            title: `Servizio ${slot.servizio}`,
+            start: `${slot.data}T${slot.ora_inizio}`,
+            end: `${slot.data}T${slot.ora_fine}`
+          }));
+          successCallback(events);
+        })
+        .catch(error => {
+          console.error('Errore nel recupero degli slot:', error);
+          failureCallback(error);
+        });
+    },
     eventClick: function(info) {
-      alert(`Hai selezionato: ${info.event.title}\nOra: ${info.event.start.toLocaleTimeString()}`);
-      // Qui puoi aggiungere un modale di prenotazione
+      const start = info.event.start;
+      const end = info.event.end;
+
+      document.getElementById('modalServizio').textContent = info.event.title;
+      document.getElementById('modalInizio').textContent = start.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+      document.getElementById('modalFine').textContent = end.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+      document.getElementById('hiddenSlotId').value = info.event.id;
+
+      const modal = new bootstrap.Modal(document.getElementById('modalePrenotazione'));
+      modal.show();
     }
   });
 
   calendar.render();
 });
+
+function confermaPrenotazione() {
+  const slotId = document.getElementById('hiddenSlotId').value;
+
+  fetch('/api/prenota_slot', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ slot_id: slotId })
+  })
+  .then(response => {
+    if (!response.ok) {
+      return response.json().then(err => { throw new Error(err.error); });
+    }
+    return response.json();
+  })
+  .then(result => {
+    const modal = bootstrap.Modal.getInstance(document.getElementById('modalePrenotazione'));
+    modal.hide();
+
+    const alertDiv = document.getElementById('alertPrenotazione');
+    alertDiv.classList.remove('d-none');
+    alertDiv.textContent = result.message || "Prenotazione effettuata! 🎉";
+
+    // ⏳ Dopo 2.5 secondi reindirizza alla pagina prenotazioni
+    setTimeout(() => {
+      window.location.href = "/utente/prenotazioni";
+    }, 2500);
+  })
+  .catch(error => {
+    alert("Errore nella prenotazione: " + error.message);
+  });
+}
 </script>
 {% endblock %}
