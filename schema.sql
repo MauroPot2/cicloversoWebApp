@@ -43,8 +43,8 @@ CREATE TABLE IF NOT EXISTS servizi (
 );
 
 INSERT INTO servizi (Servizio, Prezzo, Disponibilitá, immagine) VALUES 
-('Sostituzione manettino', 15, 1, 'static/img/manettino.png'),
-('Sostituzione cambio', 15, 1, 'static/img/cambio.png');
+('Lavaggio', 15, 1, 'static/img/manettino.png'),
+('Diagnostico', 15, 1, 'static/img/cambio.png');
 
 CREATE TABLE IF NOT EXISTS orari_apertura (
     id INTEGER PRIMARY KEY AUTOINCREMENT,

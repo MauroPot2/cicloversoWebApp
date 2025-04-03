@@ -40,6 +40,7 @@ def get_slots():
     conn.row_factory = sqlite3.Row
     cur = conn.cursor()
 
+    # Estrai gli slot per il range di date richiesto
     cur.execute('''
         SELECT id, data, ora_inizio, ora_fine, servizio_id
         FROM slot
@@ -48,17 +49,20 @@ def get_slots():
     rows = cur.fetchall()
     conn.close()
 
+    # Prepara gli eventi per FullCalendar
     events = []
     for row in rows:
         events.append({
             "id": row["id"],
-            "title": f"Servizio {row['servizio_id']}",
-            "start": f"{row['data']}T{row['ora_inizio']}",
-            "end": f"{row['data']}T{row['ora_fine']}",
-            "servizio": row["servizio_id"]
+            "data": row["data"],
+            "ora_inizio": row["ora_inizio"],
+            "ora_fine": row["ora_fine"],
+            "servizio_id": row["servizio_id"],
+            "title": f"Servizio {row['servizio_id']}"
         })
 
     return jsonify(events)
+
 
 #Crea uno slot disponibile
 @api_bp.route('/slot', methods=['POST'])

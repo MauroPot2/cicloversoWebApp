@@ -1,21 +1,62 @@
 {% extends "basic/layout.html" %}
 {% block content %}
-<div class="position-relative overflow-hidden p-3 p-md-5 m-md-3 text-center bg-body-tertiary">
-    <div class="col-md-6 p-lg-5 mx-auto my-5">
-      <h1 class="display-3 fw-bold">Passione e Professionalitá</h1>
-      <h3 class="fw-normal text-muted mb-3">Ciclomeccanica per ogni strada!</h3>
-      <div class="d-flex gap-3 justify-content-center lead fw-normal">
-        <a class="icon-link" href="/registrati">
-          Registrati
-          <svg class="bi"><use xlink:href="#chevron-right"></use></svg>
-        </a>
-        <a class="icon-link" href="/log_in">
-          Accedi
-          <svg class="bi"><use xlink:href="#chevron-right"></use></svg>
-        </a>
-      </div>
+<div class="bg-dark text-light p-5 position-relative overflow-hidden">
+    <div class="container">
+        <!-- Hero Section -->
+        <div class="row align-items-center justify-content-center">
+            <div class="col-md-6 text-center text-md-start">
+                <h1 class="display-4 fw-bold">Passione e Professionalità</h1>
+                <h3 class="fw-light mb-4">Ciclomeccanica per ogni strada!</h3>
+                <p class="lead mb-4">
+                    Siamo esperti nella cura e manutenzione della tua bicicletta. Da semplici riparazioni a servizi di biomeccanica avanzata, il nostro team è pronto a rendere ogni tuo viaggio sicuro e confortevole.
+                </p>
+                <div class="d-flex justify-content-center justify-content-md-start gap-4">
+                    <a href="/registrati" class="btn btn-primary btn-lg">Registrati</a>
+                    <a href="/log_in" class="btn btn-outline-light btn-lg">Accedi</a>
+                </div>
+            </div>
+            <div class="col-md-6 d-none d-md-block">
+                <!-- Insert an image related to cycling, such as a mechanic working on a bike -->
+                <img src="{{ url_for('static', filename='img/cycling-mechanic.jpg') }}" class="img-fluid" alt="Ciclomeccanico al lavoro">
+            </div>
+        </div>
     </div>
+
+    <!-- Decorative Devices -->
     <div class="product-device shadow-sm d-none d-md-block"></div>
-    <div class="product-device product-device-2 shadow-sm d-none d-md-block"></div>
-  </div>
+    <div class="product-device-2 shadow-sm d-none d-md-block"></div>
+</div>
+
+<!-- Section about Services -->
+<div class="container py-5">
+    <h2 class="text-center mb-4">I nostri servizi</h2>
+    <div class="row text-center">
+        <div class="col-lg-4 mb-4">
+            <i class="bi bi-tools display-1 text-primary"></i>
+            <h3>Manutenzione Biciclette</h3>
+            <p class="lead">Servizi di riparazione per ogni tipo di bicicletta. Dalla regolazione dei freni alla sostituzione del cambio.</p>
+        </div>
+        <div class="col-lg-4 mb-4">
+            <i class="bi bi-heart display-1 text-success"></i>
+            <h3>Biomeccanica</h3>
+            <p class="lead">Analisi e ottimizzazione della postura in sella per una maggiore efficienza e comfort durante la pedalata.</p>
+        </div>
+        <div class="col-lg-4 mb-4">
+            <i class="bi bi-person-check display-1 text-warning"></i>
+            <h3>Assistenza Personalizzata</h3>
+            <p class="lead">Un servizio su misura per le tue esigenze: consigli, diagnosi e riparazioni personalizzate per la tua bicicletta.</p>
+        </div>
+    </div>
+</div>
+
+<!-- Footer Section -->
+<footer class="bg-dark text-light text-center py-4">
+    <p class="mb-0">©2024 CicloVerso | Tutti i diritti riservati</p>
+    <div class="social-icons mt-3">
+        <a href="#" class="text-light me-3"><i class="bi bi-facebook"></i></a>
+        <a href="#" class="text-light me-3"><i class="bi bi-twitter"></i></a>
+        <a href="#" class="text-light"><i class="bi bi-instagram"></i></a>
+    </div>
+</footer>
+
 {% endblock %}
