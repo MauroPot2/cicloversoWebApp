@@ -54,9 +54,14 @@ def hash_password(password: str) -> str:
     return hashed.decode('utf-8')
 
 def check_password(password: str, hashed_password: str) -> bool:
-    if isinstance(hashed_password, str):
-        hashed_password = hashed_password.encode('utf-8')
-    return bcrypt.checkpw(password.encode('utf-8'), hashed_password)
+    try:
+        if isinstance(hashed_password, str):
+            hashed_password = hashed_password.encode('utf-8')
+        return bcrypt.checkpw(password.encode('utf-8'), hashed_password)
+    except ValueError as e:
+        print(f"Hash non compatibile con bcrypt: {e}")
+        return False
+
 
 def is_strong_password(password):
     if len(password) < 8:

@@ -1,6 +1,7 @@
 DROP TABLE IF EXISTS servizi;
 DROP TABLE IF EXISTS utenti;
-DROP TABLE IF EXISTS prenotazioni;
+DROP TABLE IF EXISTS prenotazione;
+DROP TABLE IF EXISTS prenotazione_immagini;
 DROP TABLE IF EXISTS slot;
 DROP TABLE IF EXISTS orari_apertura;
 
@@ -11,16 +12,24 @@ CREATE TABLE IF NOT EXISTS slot (
     ora_fine TEXT,
     servizio_id INTEGER,
     disponibile INTEGER NOT NULL DEFAULT 1,
-    prenotazioni TEXT,
     FOREIGN KEY (servizio_id) REFERENCES servizi(id)
+);
+CREATE TABLE IF NOT EXISTS prenotazione_immagini (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    prenotazione_id INTEGER,
+    path TEXT NOT NULL,
+    FOREIGN KEY (prenotazione_id) REFERENCES prenotazione(id) ON DELETE CASCADE
 );
 
 CREATE TABLE IF NOT EXISTS prenotazione (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
-    slot_id INTEGER NOT NULL,
-    utente_id INTEGER NOT NULL,
+    slot_id INTEGER,
+    utente_id INTEGER,
+    servizio_id INTEGER,
+    messaggio TEXT,
     FOREIGN KEY (slot_id) REFERENCES slot(id),
-    FOREIGN KEY (utente_id) REFERENCES utenti(id)
+    FOREIGN KEY (utente_id) REFERENCES utenti(id),
+    FOREIGN KEY (servizio_id) REFERENCES servizi(id)
 );
 
 CREATE TABLE IF NOT EXISTS utenti (
@@ -59,11 +68,3 @@ CREATE TABLE IF NOT EXISTS orari_apertura (
 INSERT INTO orari_apertura (apertura_mattina, chiusura_mattina, apertura_pomeriggio, chiusura_pomeriggio, durata_slot)
 VALUES ('10:00', '12:00', '16:00', '18:00', 60);
 
--- Inserisci degli slot predefiniti per il debug
-INSERT INTO slot (data, ora_inizio, ora_fine, servizio_id, disponibile) VALUES
-('2025-04-01', '10:00', '11:00', 1, 1),
-('2025-04-01', '11:00', '12:00', 2, 1),
-('2025-04-02', '10:00', '11:00', 1, 1),
-('2025-04-02', '11:00', '12:00', 2, 1),
-('2025-04-03', '16:00', '17:00', 1, 1),
-('2025-04-03', '17:00', '18:00', 2, 1);

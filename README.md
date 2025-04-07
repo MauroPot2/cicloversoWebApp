@@ -48,6 +48,18 @@ CicloVerso è un'applicazione web sviluppata in Python con Flask per la gestione
 
 ### Step per la configurazione:
 
+L'applicazione offre un servizio di mailing che consente algi utente di ricevere una mail di benvenuto dopo essersi registrati in piattaforma.
+Per approfittare di questo sistema va aggiunta nel root della web app il file config.py e alimentato con i seguenti dati:
+
+```python
+# config.py
+MAIL_SERVER = 'tuo nome server'
+MAIL_PORT = 'tuo numero porta'
+MAIL_USE_TLS = True
+MAIL_USERNAME = 'tuamail@mail.com'
+MAIL_PASSWORD = 'tua password' # se usi gmail hai bisogno di una password per le app per evitare l'autenticazione a due fattori che trovi qua -> https://myaccount.google.com/apppasswords
+```
+
 1. Clona il repository da GitHub:
 
 ```bash

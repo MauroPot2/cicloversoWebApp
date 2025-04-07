@@ -2,41 +2,67 @@
 {% block content %}
 <div class="d-flex flex-column flex-md-row">
   {% include 'utente/sidebar.html' %}
-  <div class="container mt-4">
 
+  <div class="container mt-4">
     <h2 class="text-center text-md-start">Calendario delle Prenotazioni</h2>
 
-    <!-- ✅ Alert per conferma prenotazione -->
+    <!-- Alert per conferma prenotazione -->
     <div id="alertPrenotazione" class="alert alert-success d-none mt-3" role="alert">
       Prenotazione effettuata con successo! 🎉
     </div>
 
-    <!-- 📅 Calendario -->
-    <div id='calendar' class="mt-4"></div>
+    <!-- Calendario -->
+    <div id="calendar" class="mt-4"></div>
   </div>
 </div>
 
-<!-- ✅ FullCalendar CSS/JS -->
+<!-- FullCalendar CSS/JS -->
 <link href="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.8/index.global.min.css" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.8/index.global.min.js"></script>
 
-<!-- ✅ Modale per prenotazione -->
+<!-- Modale prenotazione -->
 <div class="modal fade" id="modalePrenotazione" tabindex="-1" aria-labelledby="modalePrenotazioneLabel" aria-hidden="true">
-  <div class="modal-dialog modal-dialog-centered">
+  <div class="modal-dialog modal-dialog-centered modal-lg">
     <div class="modal-content shadow">
       <div class="modal-header bg-primary text-white">
         <h5 class="modal-title" id="modalePrenotazioneLabel">Conferma Prenotazione</h5>
         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Chiudi"></button>
       </div>
       <div class="modal-body">
-        <p><strong>Servizio:</strong> <span id="modalServizio"></span></p>
         <p><strong>Inizio:</strong> <span id="modalInizio"></span></p>
         <p><strong>Fine:</strong> <span id="modalFine"></span></p>
-        <input type="hidden" id="hiddenSlotId">
+
+        <form id="formPrenotazioneAvanzata" enctype="multipart/form-data">
+          <input type="hidden" id="hiddenSlotId" name="slot_id">
+
+          <div class="mb-3">
+            <label for="selectServizio" class="form-label">Servizio</label>
+            <select class="form-select" id="selectServizio" name="servizio_id" required>
+              {% for servizio in servizi %}
+              <option value="{{ servizio.id }}">
+                {{ servizio.Servizio }} - €{{ servizio.Prezzo }}
+              </option>
+              {% endfor %}
+            </select>
+          </div>
+
+          <div class="mb-3">
+            <label for="messaggioUtente" class="form-label">Messaggio (opzionale)</label>
+            <textarea class="form-control" id="messaggioUtente" name="messaggio" rows="3" placeholder="Note sulla prenotazione, richieste specifiche, ecc."></textarea>
+          </div>
+
+          <div class="mb-3">
+            <label for="fileUpload" class="form-label">Carica immagini (opzionale)</label>
+            <input class="form-control" type="file" id="fileUpload" name="immagini" multiple>
+          </div>
+        </form>
       </div>
-      <div class="modal-footer d-flex justify-content-between">
-        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annulla</button>
-        <button type="button" class="btn btn-success" onclick="confermaPrenotazione()">Conferma</button>
+      <div class="modal-footer justify-content-between">
+        <small class="text-muted">⚠️ Non è possibile prenotare per oggi o per giorni passati.</small>
+        <div>
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annulla</button>
+          <button type="button" class="btn btn-success" onclick="confermaPrenotazioneAvanzata()">Conferma</button>
+        </div>
       </div>
     </div>
   </div>
@@ -59,12 +85,15 @@ document.addEventListener('DOMContentLoaded', function () {
       fetch(`/api/slot?start=${fetchInfo.startStr}&end=${fetchInfo.endStr}`)
         .then(response => response.json())
         .then(data => {
-          const events = data.map(slot => ({
-            id: slot.id,
-            title: `Servizio ${slot.servizio}`,
-            start: `${slot.data}T${slot.ora_inizio}`,
-            end: `${slot.data}T${slot.ora_fine}`
-          }));
+          const now = new Date();
+          const events = data
+            .filter(slot => new Date(slot.data + "T" + slot.ora_inizio) > now)
+            .map(slot => ({
+              id: slot.id,
+              title: "Slot disponibile",
+              start: `${slot.data}T${slot.ora_inizio}`,
+              end: `${slot.data}T${slot.ora_fine}`
+            }));
           successCallback(events);
         })
         .catch(error => {
@@ -76,7 +105,6 @@ document.addEventListener('DOMContentLoaded', function () {
       const start = info.event.start;
       const end = info.event.end;
 
-      document.getElementById('modalServizio').textContent = info.event.title;
       document.getElementById('modalInizio').textContent = start.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
       document.getElementById('modalFine').textContent = end.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
       document.getElementById('hiddenSlotId').value = info.event.id;
@@ -89,36 +117,40 @@ document.addEventListener('DOMContentLoaded', function () {
   calendar.render();
 });
 
-function confermaPrenotazione() {
-  const slotId = document.getElementById('hiddenSlotId').value;
+function confermaPrenotazioneAvanzata() {
+  const form = document.getElementById('formPrenotazioneAvanzata');
+  const formData = new FormData(form);
 
-  fetch('/api/prenota_slot', {
+  const fileInput = document.getElementById('fileUpload');
+  for (let i = 0; i < fileInput.files.length; i++) {
+    formData.append('immagini', fileInput.files[i]);
+  }
+
+  fetch('/api/prenota_slot_avanzato', {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ slot_id: slotId })
+    body: formData
   })
-  .then(response => {
-    if (!response.ok) {
-      return response.json().then(err => { throw new Error(err.error); });
-    }
-    return response.json();
-  })
-  .then(result => {
-    const modal = bootstrap.Modal.getInstance(document.getElementById('modalePrenotazione'));
-    modal.hide();
+    .then(response => {
+      if (!response.ok) {
+        return response.json().then(err => { throw new Error(err.error); });
+      }
+      return response.json();
+    })
+    .then(result => {
+      const modal = bootstrap.Modal.getInstance(document.getElementById('modalePrenotazione'));
+      modal.hide();
 
-    const alertDiv = document.getElementById('alertPrenotazione');
-    alertDiv.classList.remove('d-none');
-    alertDiv.textContent = result.message || "Prenotazione effettuata! 🎉";
+      const alertDiv = document.getElementById('alertPrenotazione');
+      alertDiv.classList.remove('d-none');
+      alertDiv.textContent = result.message || "Prenotazione effettuata! 🎉";
 
-    // ⏳ Dopo 2.5 secondi reindirizza alla pagina prenotazioni
-    setTimeout(() => {
-      window.location.href = "/utente/prenotazioni";
-    }, 2500);
-  })
-  .catch(error => {
-    alert("Errore nella prenotazione: " + error.message);
-  });
+      setTimeout(() => {
+        window.location.href = "/utente/prenotazioni";
+      }, 2000);
+    })
+    .catch(error => {
+      alert("Errore nella prenotazione: " + error.message);
+    });
 }
 </script>
 {% endblock %}

@@ -8,24 +8,76 @@
 
     {% if prenotazioni %}
       <div class="row">
-        {% for p in prenotazioni %}
-        <div class="col-md-6 col-lg-4 mb-4">
-          <div class="card h-100 shadow-sm">
-            <div class="card-body">
-              <h5 class="card-title">{{ p['Servizio'] }}</h5>
-              <p class="mb-1"><strong>Cliente:</strong> {{ p['nome'] }} {{ p['cognome'] }}</p>
-              <p class="mb-1"><strong>Email:</strong> {{ p['email'] }}</p>
-              <p class="mb-1"><strong>Data:</strong> {{ p['data'] }}</p>
-              <p class="mb-1"><strong>Orario:</strong> {{ p['ora_inizio'] }} - {{ p['ora_fine'] }}</p>
-              <span class="badge bg-primary">Prenotazione attiva</span>
-            </div>
-          </div>
-        </div>
+        {% for prenotazione in prenotazioni %}
+<div class="col-md-6 col-lg-4 mb-4" id="card-prenotazione-{{ prenotazione['prenotazione_id'] }}">
+  <div class="card h-100 shadow-sm">
+    <div class="card-body">
+      <h5 class="card-title">{{ prenotazione['Servizio'] or 'N.D.' }}</h5>
+      <p class="mb-1"><strong>Cliente:</strong> {{ prenotazione['nome'] }} {{ prenotazione['cognome'] }}</p>
+      <p class="mb-1"><strong>Email:</strong> {{ prenotazione['email'] }}</p>
+      <p class="mb-1"><strong>Data:</strong> {{ prenotazione['data'] }}</p>
+      <p class="mb-1"><strong>Orario:</strong> {{ prenotazione['ora_inizio'] }} - {{ prenotazione['ora_fine'] }}</p>
+      <p class="mb-1"><strong>Messaggio:</strong> {{ prenotazione['messaggio'] or 'Nessun messaggio' }}</p>
+
+      {% if immagini_dict[prenotazione['prenotazione_id']] %}
+      <div class="mt-2">
+        <strong>Immagini:</strong><br>
+        {% for path in immagini_dict[prenotazione['prenotazione_id']] %}
+          <img src="{{ url_for('static', filename=path.split('static/')[1]) }}" alt="img" class="img-thumbnail me-1 mt-1" style="max-width: 100px;">
         {% endfor %}
+      </div>
+      {% endif %}
+
+      <span class="badge bg-primary mt-2">Prenotazione attiva</span>
+      <button class="btn btn-outline-danger btn-sm mt-2" onclick="eliminaPrenotazione({{ prenotazione['prenotazione_id'] }})">
+        Elimina prenotazione
+      </button>
+    </div>
+  </div>
+</div>
+{% endfor %}
+
       </div>
     {% else %}
       <div class="alert alert-info">Nessuna prenotazione trovata.</div>
     {% endif %}
   </div>
 </div>
+
+<script>
+  function eliminaPrenotazione(id) {
+    if (confirm("Vuoi davvero eliminare questa prenotazione?")) {
+      fetch(`/admin/prenotazioni/elimina/${id}`, {
+        method: 'POST'
+      })
+      .then(res => res.json())
+      .then(data => {
+        if (data.error) {
+          alert(data.error);
+          return;
+        }
+
+        alert(data.message || "Prenotazione eliminata.");
+        const card = document.getElementById(`card-prenotazione-${id}`);
+        if (card) {
+          card.remove();
+        }
+
+        const ancoraCard = document.querySelectorAll('.col[id^="card-prenotazione-"]');
+        if (ancoraCard.length === 0) {
+          const lista = document.getElementById("lista-prenotazioni");
+          lista.insertAdjacentHTML('afterend', `
+            <div id="messaggio-nessuna-prenotazione" class="alert alert-info mt-3">
+              Non ci sono prenotazioni.
+            </div>
+          `);
+        }
+      })
+      .catch(err => {
+        console.error(err);
+        alert("Errore durante l'eliminazione.");
+      });
+    }
+  }
+</script>
 {% endblock %}

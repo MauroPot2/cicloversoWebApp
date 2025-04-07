@@ -3,7 +3,7 @@ from .auth import admin_required
 from werkzeug.security import generate_password_hash
 from werkzeug.utils import secure_filename
 from slot import Slot
-from generaSlotAuto import genera_slot_per_data
+from utils.generaSlotAuto import genera_slot_per_data
 from utils.email_utils import invia_mail_benvenuto
 import sqlite3
 import os
@@ -15,9 +15,8 @@ ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg'}
 def allowed_file(filename):
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
     
-
-
 admin_bp = Blueprint('admin', __name__, url_prefix='/admin')
+
 ### Templates route Admin###
 @admin_bp.route('/', methods=['GET'])
 @admin_required
@@ -38,29 +37,47 @@ def crea_slot():
     conn.close()
     
     return render_template("admin/crea_slot.html", servizi=servizi)
+
 ###GESTIONE PRENOTAZIONI
 @admin_bp.route('/prenotazioni', methods=['GET'])
 @admin_required
 def gestisci_prenotazioni():
     conn = sqlite3.connect('usersdb.db')
     conn.row_factory = sqlite3.Row
-    prenotazioni = conn.execute('''
+    cur = conn.cursor()
+
+    # Recupera prenotazioni
+    prenotazioni = cur.execute('''
         SELECT 
             p.id AS prenotazione_id,
-            u.nome, u.cognome, u.email,
+            u.nome,
+            u.cognome,
+            u.email,
             s.Servizio,
-            sl.data, sl.ora_inizio, sl.ora_fine
+            s.Prezzo,
+            sl.data,
+            sl.ora_inizio,
+            sl.ora_fine,
+            p.messaggio
         FROM prenotazione p
         JOIN utenti u ON p.utente_id = u.id
         JOIN slot sl ON p.slot_id = sl.id
-        JOIN servizi s ON sl.servizio_id = s.id
+        LEFT JOIN servizi s ON p.servizio_id = s.id
         ORDER BY sl.data DESC, sl.ora_inizio
     ''').fetchall()
-    conn.close()
-    return render_template('admin/prenotazioni.html', prenotazioni=prenotazioni)
-    
 
-###GESTIONE UTENTI
+    # Recupera immagini per ogni prenotazione
+    immagini_dict = {}
+    for row in prenotazioni:
+        immagini = cur.execute('''
+            SELECT path FROM prenotazione_immagini WHERE prenotazione_id = ?
+        ''', (row['prenotazione_id'],)).fetchall()
+        immagini_dict[row['prenotazione_id']] = [img['path'] for img in immagini]
+
+    conn.close()
+    return render_template("admin/prenotazioni.html", prenotazioni=prenotazioni, immagini_dict=immagini_dict)
+    
+#Gestione utenti
 @admin_bp.route('/utenti', methods=['GET'])
 @admin_required
 def gestisci_utenti():
@@ -152,9 +169,7 @@ def elimina_utente(id):
     flash("Utente eliminato con successo", "success")
     return redirect(url_for('admin.gestisci_utenti'))
 
-
-
-###GESTISCI SERVIZI
+#Gestione servizi
 @admin_bp.route('/servizi', methods=['GET'])
 @admin_required
 def gestisci_servizi():
@@ -238,19 +253,19 @@ def elimina_servizio(servizio_id):
     flash('Servizio eliminato con successo', 'success')
     return redirect(url_for('admin.gestisci_servizi'))
 
-
-###SLOT AUTOMATICI
+#Crea slot standalone
 @admin_bp.route('/genera_slot_auto', methods=['POST'])
 @admin_required
 def genera_slot_auto():
-    data = request.json.get('data')  #il formato che legge date é: '2025-04-03'
+    data = request.json.get('data')  
     try:
         giorno = datetime.strptime(data, '%Y-%m-%d').date()
         genera_slot_per_data(giorno)
         return jsonify({'message': 'Slot generati automaticamente'}), 200
     except Exception as e:
         return jsonify({'error': str(e)}), 500
-###ORARI APERTURA
+
+#Gestione orari
 @admin_bp.route('/orari_apertura', methods=['GET'])
 @admin_required
 def mostra_orari_apertura():
@@ -288,76 +303,68 @@ def salva_orari_apertura():
     return redirect('/admin/orari_apertura')
 
 
-@admin_bp.route('/prenotazioni/modifica/<int:prenotazione_id>', methods=['GET', 'POST'])
+#Genera slot per data
+@admin_bp.route('/genera_slot_auto_page', methods=['GET', 'POST'])
 @admin_required
-def modifica_prenotazione(prenotazione_id):
-    conn = sqlite3.connect('usersdb.db')
-    conn.row_factory = sqlite3.Row
-    cur = conn.cursor()
-
+def genera_slot_auto_page():
     if request.method == 'POST':
-        nuova_data = request.form['data_ora']
-        nuovo_servizio_id = request.form['servizio_id']
-
-        cur.execute("""
-            UPDATE prenotazione
-            SET data_ora = ?, servizio_id = ?
-            WHERE id = ?
-        """, (nuova_data, nuovo_servizio_id, prenotazione_id))
-
-        conn.commit()
-
-        # Recupera info per email
-        cur.execute("""
-            SELECT u.email, u.nome FROM prenotazione p
-            JOIN utenti u ON p.utente_id = u.id
-            WHERE p.id = ?
-        """, (prenotazione_id,))
-        utente = cur.fetchone()
-        conn.close()
-
+        data = request.form.get('data')
         try:
-            from utils.email_utils import invia_mail_modifica_prenotazione
-            invia_mail_modifica_prenotazione(utente['email'], utente['nome'], nuova_data)
+            giorno = datetime.strptime(data, '%Y-%m-%d').date()
+            genera_slot_per_data(giorno)
+            flash("Slot generati con successo ✅", "success")
         except Exception as e:
-            print(f"Errore nell'invio della mail di modifica: {e}")
+            flash(f"Errore durante la generazione degli slot: {e}", "danger")
+        return redirect(url_for('admin.genera_slot_auto_page'))
+    
+    return render_template('admin/genera_slot_auto_page.html')
 
-        flash("Prenotazione aggiornata!", "success")
-        return redirect(url_for('admin.gestisci_prenotazioni'))
-
-    # GET -> visualizza prenotazione
-    cur.execute("SELECT * FROM prenotazione WHERE id = ?", (prenotazione_id,))
-    prenotazione = cur.fetchone()
-
-    servizi = cur.execute("SELECT * FROM servizi").fetchall()
-    conn.close()
-    return render_template('admin/modifica_prenotazione.html', prenotazione=prenotazione, servizi=servizi)
-
+#Elimina prenotazioni
 @admin_bp.route('/prenotazioni/elimina/<int:prenotazione_id>', methods=['POST'])
 @admin_required
 def elimina_prenotazione(prenotazione_id):
+    try:
+        conn = sqlite3.connect('usersdb.db')
+        conn.row_factory = sqlite3.Row
+        cur = conn.cursor()
+
+        # Elimina la prenotazione dal database
+        cur.execute("DELETE FROM prenotazione WHERE id = ?", (prenotazione_id,))
+        conn.commit()
+        conn.close()
+
+        # Restituisci un messaggio di successo
+        return jsonify({'message': 'Prenotazione eliminata con successo.'}), 200
+
+    except Exception as e:
+        print(f"[ERRORE] Eliminazione prenotazione: {e}")
+        return jsonify({'error': 'Errore durante l\'eliminazione della prenotazione.'}), 500
+
+#Visualizza prenotazioni
+@admin_bp.route('/prenotazioni', methods=['GET'])
+@admin_required
+def visualizza_prenotazioni():
+    # Connessione al database
     conn = sqlite3.connect('usersdb.db')
     conn.row_factory = sqlite3.Row
     cur = conn.cursor()
 
-    # Recupera info utente
-    cur.execute("""
-        SELECT u.email, u.nome, p.data_ora
+    # Query per ottenere tutte le prenotazioni
+    cur.execute('''
+        SELECT 
+            p.id AS prenotazione_id,
+            u.nome, u.cognome, u.email,
+            s.Servizio,
+            sl.data, sl.ora_inizio, sl.ora_fine
         FROM prenotazione p
         JOIN utenti u ON p.utente_id = u.id
-        WHERE p.id = ?
-    """, (prenotazione_id,))
-    prenotazione = cur.fetchone()
+        JOIN slot sl ON p.slot_id = sl.id
+        JOIN servizi s ON sl.servizio_id = s.id
+        ORDER BY sl.data DESC, sl.ora_inizio
+    ''')
 
-    cur.execute("DELETE FROM prenotazione WHERE id = ?", (prenotazione_id,))
-    conn.commit()
+    prenotazioni = cur.fetchall()
     conn.close()
 
-    try:
-        from utils.email_utils import invia_mail_annullamento
-        invia_mail_annullamento(prenotazione['email'], prenotazione['nome'], prenotazione['data_ora'])
-    except Exception as e:
-        print(f"Errore nell'invio della mail di annullamento: {e}")
-
-    flash("Prenotazione annullata", "warning")
-    return redirect(url_for('admin.gestisci_prenotazioni'))
+    # Passa le prenotazioni al template
+    return render_template('admin/prenotazioni.html', prenotazioni=prenotazioni)

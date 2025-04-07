@@ -50,17 +50,17 @@ def visualizza_prenotazioni():
 
     prenotazioni = cur.execute('''
         SELECT 
-        p.id AS prenotazione_id,
-        s.Servizio,
-        s.Prezzo,
-        sl.data,
-        sl.ora_inizio,
-        sl.ora_fine
-    FROM prenotazione p
-    JOIN slot sl ON p.slot_id = sl.id
-    JOIN servizi s ON sl.servizio_id = s.id
-    WHERE p.utente_id = ?
-    ORDER BY sl.data DESC, sl.ora_inizio
+            p.id AS prenotazione_id,
+            s.Servizio,
+            s.Prezzo,
+            sl.data,
+            sl.ora_inizio,
+            sl.ora_fine
+        FROM prenotazione p
+        JOIN slot sl ON p.slot_id = sl.id
+        LEFT JOIN servizi s ON p.servizio_id = s.id
+        WHERE p.utente_id = ?
+        ORDER BY sl.data DESC, sl.ora_inizio
     ''', (user_id,)).fetchall()
 
     conn.close()
@@ -96,12 +96,20 @@ def profilo():
     conn.close()
     return render_template('utente/profilo.html', utente=utente)
 
+#Visualizza calendario e servizi nel form modale
 @user_bp.route('/calendario')
 def calendario():
     if 'user_id' not in session or session.get('ruolo') != 'utente':
         return redirect(url_for('auth.login'))
-    return render_template('utente/calendario.html')
-###Cambia Password
+
+    conn = sqlite3.connect('usersdb.db')
+    conn.row_factory = sqlite3.Row
+    servizi = conn.execute("SELECT id, Servizio, Prezzo FROM servizi").fetchall()
+    conn.close()
+
+    return render_template("utente/calendario.html", servizi=servizi)
+
+#Cambia Password
 @user_bp.route('/cambia_password', methods=['POST'])
 def cambia_password():
     if 'user_id' not in session or session.get('ruolo') != 'utente':

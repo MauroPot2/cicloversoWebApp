@@ -7,28 +7,80 @@
     <h2>Le tue prenotazioni</h2>
 
     {% if prenotazioni %}
-      <div class="row row-cols-1 row-cols-md-2 g-3">
+      <div class="row row-cols-1 row-cols-md-2 g-3" id="lista-prenotazioni">
         {% for prenotazione in prenotazioni %}
-        <div class="col">
+        <div class="col" id="card-prenotazione-{{ prenotazione['prenotazione_id'] }}">
           <div class="card shadow-sm">
             <div class="card-body">
-              <h5 class="card-title">{{ prenotazione['Servizio'] }}</h5>
+              <h5 class="card-title">{{ prenotazione['Servizio']}}</h5>
               <p class="card-text">
                 📅 Data: {{ prenotazione['data'] }}<br>
                 🕒 Orario: {{ prenotazione['ora_inizio'] }} - {{ prenotazione['ora_fine'] }}<br>
-                💶 Prezzo: {{ prenotazione['Prezzo'] }} €
+                💶 Prezzo: {{ prenotazione['Prezzo'] or 'N.D.' }} €
               </p>
-              <span class="badge bg-success">Prenotato</span>
+
+              {% set slot_datetime = prenotazione['data'] ~ ' ' ~ prenotazione['ora_inizio'] %}
+              {% set slot_timestamp = slot_datetime | to_datetime('%Y-%m-%d %H:%M:%S') %}
+              {% set now = current_time %}
+              {% if (slot_timestamp.timestamp() - now.timestamp()) > 172800 %}
+                <button class="btn btn-outline-danger btn-sm" onclick="annullaPrenotazione({{ prenotazione['prenotazione_id'] }})">
+                  Annulla prenotazione
+                </button>
+              {% else %}
+                <span class="badge bg-secondary">Non annullabile</span><br>
+                <small class="text-muted">Annullabile solo entro 48h dall'appuntamento.</small>
+              {% endif %}
             </div>
           </div>
         </div>
         {% endfor %}
       </div>
     {% else %}
-      <div class="alert alert-info mt-3">
+      <div id="messaggio-nessuna-prenotazione" class="alert alert-info mt-3">
         Non hai ancora effettuato prenotazioni.
       </div>
     {% endif %}
   </div>
 </div>
+
+<script>
+  function annullaPrenotazione(id) {
+    if (confirm("Vuoi davvero annullare questa prenotazione?")) {
+      fetch(`/api/prenotazione/${id}`, {
+        method: 'DELETE'
+      })
+      .then(res => res.json())
+      .then(data => {
+        if (data.error) {
+          alert(data.error);
+          return;
+        }
+
+        alert(data.message || "Prenotazione annullata.");
+
+       
+        const card = document.getElementById(`card-prenotazione-${id}`);
+        if (card) {
+          card.remove();
+        }
+
+       
+        const ancoraCard = document.querySelectorAll('.col[id^="card-prenotazione-"]');
+        if (ancoraCard.length === 0) {
+          const lista = document.getElementById("lista-prenotazioni");
+          lista.insertAdjacentHTML('afterend', `
+            <div id="messaggio-nessuna-prenotazione" class="alert alert-info mt-3">
+              Non hai ancora effettuato prenotazioni.
+            </div>
+          `);
+        }
+
+      })
+      .catch(err => {
+        console.error(err);
+        alert("Errore durante l'annullamento.");
+      });
+    }
+  }
+</script>
 {% endblock %}

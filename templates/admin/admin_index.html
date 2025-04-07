@@ -3,7 +3,7 @@
 <div class="container mt-4">
     <h2 class="mb-4">👋 Benvenuto, {{ admin_utente[1] }}</h2>
 
-    <!-- ✅ STATISTICHE RAPIDE -->
+    <!--STATISTICHE RAPIDE -->
     <div class="row text-center mb-4">
         <div class="col-md-3">
             <div class="bg-primary text-white p-3 rounded shadow-sm">
@@ -31,14 +31,15 @@
         </div>
     </div>
 
-    <!-- 🔧 SEZIONI PRINCIPALI -->
+        <!--SEZIONI PRINCIPALI -->
     <div class="row">
         {% set card_info = [
             ('📅 Slot Disponibili', 'Crea e gestisci gli slot.', 'btn-outline-primary', 'crea_slot'),
             ('🗓 Prenotazioni', 'Visualizza tutte le prenotazioni.', 'btn-outline-success', 'prenotazioni'),
             ('👥 Utenti', 'Gestisci gli utenti registrati.', 'btn-outline-dark', 'utenti'),
             ('🔧 Servizi', 'Modifica i servizi disponibili.', 'btn-outline-warning', 'servizi'),
-            ('🕒 Orari Apertura', 'Imposta orari e durata slot.', 'btn-outline-info', 'orari_apertura')
+            ('🕒 Orari Apertura', 'Imposta orari e durata slot.', 'btn-outline-info', 'orari_apertura'),
+            ('⚙️ Genera Slot Automatici', 'Genera slot in base agli orari di apertura.', 'btn-outline-secondary', 'genera_slot_auto_page')
         ] %}
         {% for title, text, btn_class, link in card_info %}
         <div class="col-md-4 mb-4">
@@ -52,44 +53,5 @@
         </div>
         {% endfor %}
     </div>
-
-    <!-- 📊 GRAFICO -->
-    <div class="card mt-4 shadow-sm">
-        <div class="card-body">
-            <h5 class="card-title">📈 Prenotazioni per giorno</h5>
-            <canvas id="chartPrenotazioni" height="100"></canvas>
-        </div>
-    </div>
-</div>
-
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-<script>
-const prenotazioniChart = document.getElementById('chartPrenotazioni');
-fetch('/api/prenotazioni_per_giorno')
-    .then(res => res.json())
-    .then(data => {
-        const labels = data.map(item => item.data);
-        const values = data.map(item => item.numero);
-        new Chart(prenotazioniChart, {
-            type: 'bar',
-            data: {
-                labels: labels,
-                datasets: [{
-                    label: 'Prenotazioni',
-                    data: values,
-                    backgroundColor: '#0d6efd'
-                }]
-            },
-            options: {
-                responsive: true,
-                plugins: {
-                    legend: { display: false }
-                },
-                scales: {
-                    y: { beginAtZero: true }
-                }
-            }
-        });
-    });
-</script>
 {% endblock %}

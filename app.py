@@ -2,6 +2,7 @@ from flask import Flask, render_template, redirect, url_for, session
 from flask_session import Session
 from flask_cors import CORS
 from flask_mail import Mail
+from utils.generaSlotAuto import genera_slot_mensile_escludendo_weekend
 import config
 import secrets
 import sqlite3
@@ -48,7 +49,7 @@ app.register_blueprint(auth_bp)
 app.register_blueprint(api_bp, url_prefix='/api')
 app.register_blueprint(user_bp, url_prefix='/utente')
 
-# 🌐 ROUTES pubbliche
+#ROUTES pubbliche
 @app.route('/')
 def index():
     return render_template('basic/index.html')
@@ -79,7 +80,7 @@ def profiloUtente():
         return redirect(url_for('auth.login'))
     return redirect(url_for('utente.profilo'))
 
-# 🔧 Filtro per formattare date
+# Filtro per formattare date
 @app.template_filter('datetimeformat')
 def datetimeformat(value, format='%d/%m/%Y'):
     try:
@@ -88,7 +89,17 @@ def datetimeformat(value, format='%d/%m/%Y'):
     except:
         return value
 
-# 🏁 Avvio app con setup iniziale DB
+@app.template_filter('to_datetime')
+def to_datetime_filter(value, format='%Y-%m-%d %H:%M'):
+    from datetime import datetime
+    return datetime.strptime(value, format)
+
+@app.context_processor
+def inject_now():
+    from datetime import datetime
+    return {'current_time': datetime.now()}
+
+# Avvio app con setup iniziale DB
 if __name__ == '__main__':
     init_db()
     inserisci_admin(
@@ -107,4 +118,5 @@ if __name__ == '__main__':
         password='Test100.',
         ruolo='utente'
     )
+    genera_slot_mensile_escludendo_weekend()
     app.run(debug=True)
