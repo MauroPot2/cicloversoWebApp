@@ -48,8 +48,9 @@ CicloVerso è un'applicazione web sviluppata in Python con Flask per la gestione
 
 ### Step per la configurazione:
 
-L'applicazione offre un servizio di mailing che consente algi utente di ricevere una mail di benvenuto dopo essersi registrati in piattaforma.
-Per approfittare di questo sistema va aggiunta nel root della web app il file config.py e alimentato con i seguenti dati:
+°°°Attenzione se ignori questo passaggio l'app andrà in crash°°°
+L'applicazione offre un servizio di mailing che consente agli utente di ricevere una mail di benvenuto dopo essersi registrati in piattaforma.
+Aggiungi nel root della web app il file config.py e alimentato con i seguenti dati:
 
 ```python
 # config.py
@@ -80,19 +81,14 @@ source venv/bin/activate   # per Windows usa: venv\Scripts\activate
 pip install -r requirements.txt
 ```
 
-4. Inizializza il database:
+
+4. Avvia l'applicazione Flask:
 
 ```bash
-sqlite3 usersdb.db < schema.sql
+python app.py
 ```
 
-5. Avvia l'applicazione Flask:
-
-```bash
-flask run
-```
-
-6. Visita l'applicazione all'indirizzo `http://localhost:5000`.
+5. Visita l'applicazione all'indirizzo `http://localhost:5000`.
 
 ## 📂 Struttura del Progetto
 
@@ -152,5 +148,3 @@ Per qualsiasi dubbio, suggerimento o collaborazione:
 
 Questo progetto è rilasciato sotto licenza MIT.  
 Per maggiori informazioni leggi il file [LICENSE](LICENSE).
-
-🚲 CicloVerso – La tua bici sempre in ottime mani! 🚲
