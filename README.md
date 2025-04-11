@@ -90,6 +90,19 @@ python app.py
 
 5. Visita l'applicazione all'indirizzo `http://localhost:5000`.
 
+All'avvio l'applicazione alimenterá il database con due utenti prova:
+
+L'utente admin dovrá accedere al sito con le credenziali:
+Mail     ->  admin@example.com
+Password ->  Admin100.
+
+Il normale utente dovrá accedere al sito con le credenziali:
+Mail     -> test@example.com
+Password -> Test100.
+
+All'avvio dell'applicazione si autocompilerá il calendario con gli slot disponibili,
+si potrá pertanto testare da subito la prenotazione degli slot.
+
 ## 📂 Struttura del Progetto
 
 ```bash
