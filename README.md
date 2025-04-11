@@ -63,7 +63,7 @@ MAIL_PASSWORD = 'tua password'  #se usi gmail hai bisogno di una password
 1. Clona il repository da GitHub:
 
 ```bash
-git clone https://github.com/tuo-username/cicloversoWebApp.git
+git clone https://github.com/MauroPot2/cicloversoWebApp
 cd cicloversoWebApp
 ```
 
