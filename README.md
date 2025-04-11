@@ -55,9 +55,9 @@ MAIL_SERVER = 'tuo nome server'
 MAIL_PORT = 'tuo numero porta'
 MAIL_USE_TLS = True
 MAIL_USERNAME = 'tuamail@mail.com'
-MAIL_PASSWORD = 'tua password' # se usi gmail hai bisogno di una password
-                                per le app per evitare l'autenticazione
-                                a due fattori che trovi qua -> https://myaccount.google.com/apppasswords
+MAIL_PASSWORD = 'tua password'  #se usi gmail hai bisogno di una password
+                                #per le app per evitare l'autenticazione
+                                #a due fattori che trovi qua -> https://myaccount.google.com/apppasswords
 ```
 
 1. Clona il repository da GitHub:
