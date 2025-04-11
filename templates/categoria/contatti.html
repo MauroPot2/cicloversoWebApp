@@ -1,5 +1,61 @@
 {% extends "basic/layout.html" %}
-
 {% block content %}
-<p>Contatti</p>
-{% endblock %}
+
+
+<section class="bg-dark text-white text-center py-5">
+    <div class="container">
+      <h1 class="display-4">Contattaci</h1>
+      <p class="lead">Hai domande? Siamo a tua disposizione per qualsiasi informazione o supporto tecnico.</p>
+    </div>
+  </section>
+  
+
+  <section class="py-5">
+    <div class="container">
+      <div class="row justify-content-center">
+        <div class="col-lg-8">
+          <div class="contact-card">
+            <div class="text-center mb-4">
+              <i class="bi bi-envelope-paper-heart form-icon"></i>
+              <h2>Scrivici un messaggio</h2>
+              <p class="text-muted">Ti risponderemo il prima possibile 📬</p>
+            </div>
+  
+            <form method="POST" action="/invia_contatto">
+              <div class="mb-3">
+                <label for="nome" class="form-label">Nome</label>
+                <input type="text" class="form-control" id="nome" name="nome" placeholder="Il tuo nome" required>
+              </div>
+              <div class="mb-3">
+                <label for="email" class="form-label">Email</label>
+                <input type="email" class="form-control" id="email" name="email" placeholder="la tua@email.com" required>
+              </div>
+              <div class="mb-3">
+                <label for="telefono" class="form-label">Telefono</label>
+                <input type="tel" class="form-control" id="telefono" name="telefono" placeholder="Es. +39 333 1234567">
+              </div>
+              <div class="mb-3">
+                <label for="messaggio" class="form-label">Messaggio</label>
+                <textarea class="form-control" id="messaggio" name="messaggio" rows="5" placeholder="Scrivi qui il tuo messaggio..." required></textarea>
+              </div>
+              <div class="text-center">
+                <button type="submit" class="btn btn-primary btn-lg px-5">
+                  <i class="bi bi-send"></i> Invia messaggio
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+  
+  <section class="bg-primary text-white text-center py-5 mt-5">
+    <div class="container">
+      <h4 class="mb-3">Preferisci prenotare direttamente?</h4>
+      <a href="/utente/calendario" class="btn btn-light btn-lg">
+        <i class="bi bi-calendar-check"></i> Vai al calendario
+      </a>
+    </div>
+  </section>
+  {% endblock %}

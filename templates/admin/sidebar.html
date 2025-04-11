@@ -1,5 +1,19 @@
-<div class="d-flex flex-column flex-shrink-0 p-3 bg-light" style="width: 250px; height: 100vh;">
-    <a href="{{ url_for('admin.admin') }}" class="d-flex align-items-center mb-3 mb-md-0 me-md-auto text-decoration-none">
+<nav class="navbar bg-light d-md-none">
+  <div class="container-fluid">
+    <button class="btn btn-outline-primary" type="button" data-bs-toggle="offcanvas" data-bs-target="#sidebarAdmin" aria-controls="sidebarAdmin">
+      <i class="bi bi-list"></i> Menu
+    </button>
+  </div>
+</nav>
+
+
+<div class="offcanvas-md offcanvas-start d-flex flex-column flex-shrink-0 p-3 bg-light" tabindex="-1" id="sidebarAdmin">
+  <div class="offcanvas-header d-md-none">
+    <h5 class="offcanvas-title">Menu Admin</h5>
+    <button type="button" class="btn-close text-reset" data-bs-dismiss="offcanvas" aria-label="Chiudi"></button>
+  </div>
+  <div class="offcanvas-body p-0 d-flex flex-column">
+    <a href="{{ url_for('admin.admin') }}" class="d-flex align-items-center mb-3 text-decoration-none">
       <i class="bi bi-speedometer2 me-2"></i><span class="fs-4">Dashboard</span>
     </a>
     <hr>
@@ -9,6 +23,7 @@
       <li><a href="{{ url_for('admin.gestisci_utenti') }}" class="nav-link {% if request.endpoint == 'admin.gestisci_utenti' %}active{% endif %}"><i class="bi bi-people me-2"></i>Utenti</a></li>
       <li><a href="{{ url_for('admin.gestisci_servizi') }}" class="nav-link {% if request.endpoint == 'admin.gestisci_servizi' %}active{% endif %}"><i class="bi bi-tools me-2"></i>Servizi</a></li>
       <li><a href="{{ url_for('admin.mostra_orari_apertura') }}" class="nav-link {% if request.endpoint == 'admin.mostra_orari_apertura' %}active{% endif %}"><i class="bi bi-clock-history me-2"></i>Orari Apertura</a></li>
+      <li><a href="{{ url_for('auth.logout') }}" class="nav-link {% if request.endpoint == 'auth.logout' %}active{% endif %}"><i class="bi bi-clock-history me-2"></i>Logout</a></li>
     </ul>
   </div>
-  
+</div>

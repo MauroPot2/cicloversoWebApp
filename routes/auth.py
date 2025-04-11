@@ -215,3 +215,37 @@ Se non hai richiesto questa operazione, ignora semplicemente questa email.
             print(f"Errore invio email reset: {e}")
 
     return render_template("categoria/reimposta_password.html")
+
+@auth_bp.route('/invia_contatto', methods=['POST'])
+def invia_contatto():
+    nome = request.form.get('nome')
+    email = request.form.get('email')
+    messaggio = request.form.get('messaggio')
+
+    if not nome or not email or not messaggio:
+        flash("Tutti i campi sono obbligatori.", "danger")
+        return redirect(url_for('contatti'))
+
+    try:
+        msg = Message(
+            subject=f"[Contatto CicloVerso] Messaggio da {nome}",
+            sender='noreply@cicloverso.com',
+            recipients=['tuo@email.it']#Cambia con la tua email
+        )
+        msg.body = f"""
+Hai ricevuto un nuovo messaggio dal sito CicloVerso:
+
+Nome: {nome}
+Email: {email}
+
+Messaggio:
+{messaggio}
+""".strip()
+
+        mail.send(msg)
+        flash("Messaggio inviato con successo! 📩", "success")
+    except Exception as e:
+        flash("Errore durante l'invio. Riprova più tardi.", "danger")
+        print(f"[MAIL ERROR] {e}")
+
+    return redirect(url_for('contatti'))

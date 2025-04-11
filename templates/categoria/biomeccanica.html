@@ -1,1 +1,76 @@
 {% extends "basic/layout.html" %}
+{% block content %}
+
+<section class="py-5">
+    <div class="container">
+        <h2 class="text-center mb-4">I nostri servizi</h2>
+        <div class="row g-4">
+
+            <div class="col-md-6 col-lg-4">
+                <div class="card p-3 service-card h-100 text-center">
+                    <i class="bi bi-bicycle icon-service text-primary mb-3"></i>
+                    <h5>Bike Fit Completo</h5>
+                    <p>Analisi completa della tua posizione per prevenire dolori e aumentare la performance.</p>
+                </div>
+            </div>
+
+            <div class="col-md-6 col-lg-4">
+                <div class="card p-3 service-card h-100 text-center">
+                    <i class="bi bi-person-check icon-service text-success mb-3"></i>
+                    <h5>Analisi Posturale</h5>
+                    <p>Valutazione della tua biomeccanica per trovare il corretto equilibrio tra comfort e resa.</p>
+                </div>
+            </div>
+
+            <div class="col-md-6 col-lg-4">
+                <div class="card p-3 service-card h-100 text-center">
+                    <i class="bi bi-graph-up icon-service text-warning mb-3"></i>
+                    <h5>Studio della pedalata</h5>
+                    <p>Monitoraggio della forza applicata per ottimizzare la fase attiva e passiva del colpo di pedale.</p>
+                </div>
+            </div>
+
+            <div class="col-md-6 col-lg-4">
+                <div class="card p-3 service-card h-100 text-center">
+                    <i class="bi bi-gear-wide icon-service text-danger mb-3"></i>
+                    <h5>Regolazione componenti</h5>
+                    <p>Posizionamento preciso di sella, manubrio, tacchette e pedali per il tuo stile di pedalata.</p>
+                </div>
+            </div>
+
+            <div class="col-md-6 col-lg-4">
+                <div class="card p-3 service-card h-100 text-center">
+                    <i class="bi bi-speedometer2 icon-service text-info mb-3"></i>
+                    <h5>Test di Efficienza</h5>
+                    <p>Verifica delle prestazioni biomeccaniche su rulli o strada per monitorare i progressi.</p>
+                </div>
+            </div>
+
+            <div class="col-md-6 col-lg-4">
+                <div class="card p-3 service-card h-100 text-center">
+                    <i class="bi bi-body-text icon-service text-secondary mb-3"></i>
+                    <h5>Consulenza su misura</h5>
+                    <p>Servizi personalizzati per atleti, amatori o chi cerca semplicemente più comfort.</p>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</section>
+
+
+<section class="bg-primary text-white text-center py-5 mt-5">
+    <div class="container">
+      <h4 class="mb-4">Prenota il tuo intervento biomeccanico o contattaci per maggiori informazioni</h4>
+      <div class="d-flex flex-column flex-md-row justify-content-center gap-3">
+        <a href="/utente/calendario" class="btn btn-light btn-lg">
+          <i class="bi bi-calendar-check"></i> Prenota
+        </a>
+        <a href="/contatti" class="btn btn-outline-light btn-lg">
+          <i class="bi bi-envelope"></i> Contattaci
+        </a>
+      </div>
+    </div>
+  </section>
+  
+{% endblock %}

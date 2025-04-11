@@ -1,0 +1,86 @@
+{% extends "basic/layout.html" %}
+
+{% block content %}
+
+<section class="bg-dark text-white text-center py-5">
+    <div class="container">
+        <h1 class="display-4">Assistenza Personalizzata</h1>
+        <p class="lead">Soluzioni su misura per te e la tua bicicletta. Professionalità, ascolto e risultati garantiti.</p>
+    </div>
+</section>
+
+
+<section class="py-5">
+    <div class="container">
+        <h2 class="text-center mb-4">Cosa possiamo fare per te?</h2>
+        <div class="row g-4">
+
+            <div class="col-md-6 col-lg-4">
+                <div class="card p-3 service-card h-100 text-center">
+                    <i class="bi bi-chat-dots icon-service text-primary mb-3"></i>
+                    <h5>Consulenze tecniche</h5>
+                    <p>Ascoltiamo le tue esigenze e ti consigliamo gli interventi ideali per il tuo stile di guida.</p>
+                </div>
+            </div>
+
+            <div class="col-md-6 col-lg-4">
+                <div class="card p-3 service-card h-100 text-center">
+                    <i class="bi bi-nut icon-service text-success mb-3"></i>
+                    <h5>Riparazioni su misura</h5>
+                    <p>Interventi mirati su freni, trasmissione, ruote e componenti secondo le tue reali necessità.</p>
+                </div>
+            </div>
+
+            <div class="col-md-6 col-lg-4">
+                <div class="card p-3 service-card h-100 text-center">
+                    <i class="bi bi-bag-check icon-service text-warning mb-3"></i>
+                    <h5>Preparazione per eventi</h5>
+                    <p>Prepara la tua bici per una gara, un viaggio o una granfondo con i nostri check professionali.</p>
+                </div>
+            </div>
+
+            <div class="col-md-6 col-lg-4">
+                <div class="card p-3 service-card h-100 text-center">
+                    <i class="bi bi-house-door icon-service text-danger mb-3"></i>
+                    <h5>Interventi a domicilio</h5>
+                    <p>Su richiesta, possiamo raggiungerti per effettuare assistenza senza che tu debba spostarti.</p>
+                </div>
+            </div>
+
+            <div class="col-md-6 col-lg-4">
+                <div class="card p-3 service-card h-100 text-center">
+                    <i class="bi bi-check2-square icon-service text-info mb-3"></i>
+                    <h5>Controllo completo</h5>
+                    <p>Verifica totale della bici con report dettagliato e suggerimenti per interventi futuri.</p>
+                </div>
+            </div>
+
+            <div class="col-md-6 col-lg-4">
+                <div class="card p-3 service-card h-100 text-center">
+                    <i class="bi bi-stars icon-service text-secondary mb-3"></i>
+                    <h5>Upgrade personalizzati</h5>
+                    <p>Ti aiutiamo a scegliere e installare i componenti giusti per migliorare la tua esperienza.</p>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</section>
+
+
+<section class="bg-primary text-white text-center py-5 mt-5">
+    <div class="container">
+      <h4 class="mb-4">Prenota il tuo intervento personalizzato o contattaci per maggiori informazioni</h4>
+      <div class="d-flex flex-column flex-md-row justify-content-center gap-3">
+        <a href="/utente/calendario" class="btn btn-light btn-lg">
+          <i class="bi bi-calendar-check"></i> Prenota
+        </a>
+        <a href="/contatti" class="btn btn-outline-light btn-lg">
+          <i class="bi bi-envelope"></i> Contattaci
+        </a>
+      </div>
+    </div>
+  </section>
+  
+
+{% endblock %}

@@ -54,6 +54,10 @@ app.register_blueprint(user_bp, url_prefix='/utente')
 def index():
     return render_template('basic/index.html')
 
+@app.route('/assistenza')
+def assitenza():
+    return render_template("categoria/assistenza.html")
+
 @app.route('/contatti')
 def contatti():
     return render_template("categoria/contatti.html")
