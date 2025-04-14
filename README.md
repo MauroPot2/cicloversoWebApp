@@ -23,9 +23,6 @@ CicloVerso è un'applicazione web sviluppata in Python con Flask per la gestione
 - ✅ **Responsive & Mobile First**
   - Progettato per un’esperienza utente ottimale su dispositivi desktop e mobile
 
-- ✅ **Comunicazione efficace**
-  - Integrazione email per notifiche di prenotazione e modifiche
-
 ## 🛠️ Tecnologie utilizzate
 
 - **Backend**
@@ -50,7 +47,7 @@ CicloVerso è un'applicazione web sviluppata in Python con Flask per la gestione
 
 °°°Attenzione se ignori questo passaggio l'app andrà in crash°°°
 L'applicazione offre un servizio di mailing che consente agli utente di ricevere una mail di benvenuto dopo essersi registrati in piattaforma.
-Aggiungi nel root della web app il file config.py e alimentato con i seguenti dati:
+Aggiungi nel root della webApp il file config.py e alimentalo con i seguenti dati:
 
 ```python
 # config.py
@@ -58,13 +55,15 @@ MAIL_SERVER = 'tuo nome server'
 MAIL_PORT = 'tuo numero porta'
 MAIL_USE_TLS = True
 MAIL_USERNAME = 'tuamail@mail.com'
-MAIL_PASSWORD = 'tua password' # se usi gmail hai bisogno di una password per le app per evitare l'autenticazione a due fattori che trovi qua -> https://myaccount.google.com/apppasswords
+MAIL_PASSWORD = 'tua password'  #se usi gmail hai bisogno di una password
+                                #per le app per evitare l'autenticazione
+                                #a due fattori che trovi qua -> https://myaccount.google.com/apppasswords
 ```
 
 1. Clona il repository da GitHub:
 
 ```bash
-git clone https://github.com/tuo-username/cicloversoWebApp.git
+git clone https://github.com/MauroPot2/cicloversoWebApp
 cd cicloversoWebApp
 ```
 
@@ -102,35 +101,6 @@ Password -> Test100.
 
 All'avvio dell'applicazione si autocompilerá il calendario con gli slot disponibili,
 si potrá pertanto testare da subito la prenotazione degli slot.
-
-## 📂 Struttura del Progetto
-
-```bash
-CicloVerso/
-├── static/
-│   ├── css/
-│   ├── js/
-│   └── img/
-│
-├── templates/
-│   ├── basic/
-│   ├── admin/
-│   ├── utente/
-│   └── categoria/
-│
-├── utils/
-│   └── email_utils.py
-│
-├── blueprints/
-│   ├── auth.py
-│   ├── admin.py
-│   ├── user.py
-│   └── api.py
-│
-├── schema.sql
-├── requirements.txt
-└── app.py
-```
 
 ## 🚀 Roadmap per sviluppi futuri
 
