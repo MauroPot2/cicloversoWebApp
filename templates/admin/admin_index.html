@@ -6,30 +6,39 @@
     <!--STATISTICHE RAPIDE -->
     <div class="row text-center mb-4">
         <div class="col-md-3">
-            <div class="bg-primary text-white p-3 rounded shadow-sm">
-                <h5><i class="bi bi-calendar3"></i> Slot Totali</h5>
-                <p class="fs-4">{{ stat_slot }}</p>
-            </div>
+            <a href="{{ url_for('admin.genera_slot_auto_page') }}" class="text-decoration-none">
+                <div class="bg-primary text-white p-3 rounded shadow-sm">
+                    <h5><i class="bi bi-calendar3"></i> Slot Totali</h5>
+                    <p class="fs-4">{{ stat_slot }}</p>
+                </div>
+            </a>
         </div>
         <div class="col-md-3">
-            <div class="bg-success text-white p-3 rounded shadow-sm">
-                <h5><i class="bi bi-check-circle"></i> Prenotazioni</h5>
-                <p class="fs-4">{{ stat_prenotazioni }}</p>
-            </div>
+            <a href="{{ url_for('admin.visualizza_prenotazioni') }}" class="text-decoration-none">
+                <div class="bg-success text-white p-3 rounded shadow-sm">
+                    <h5><i class="bi bi-check-circle"></i> Prenotazioni</h5>
+                    <p class="fs-4">{{ stat_prenotazioni }}</p>
+                </div>
+            </a>
         </div>
         <div class="col-md-3">
-            <div class="bg-warning text-dark p-3 rounded shadow-sm">
-                <h5><i class="bi bi-people-fill"></i> Utenti</h5>
-                <p class="fs-4">{{ stat_utenti }}</p>
-            </div>
+            <a href="{{ url_for('admin.gestisci_utenti') }}" class="text-decoration-none">
+                <div class="bg-warning text-dark p-3 rounded shadow-sm">
+                    <h5><i class="bi bi-people-fill"></i> Utenti</h5>
+                    <p class="fs-4">{{ stat_utenti }}</p>
+                </div>
+            </a>
         </div>
         <div class="col-md-3">
-            <div class="bg-info text-white p-3 rounded shadow-sm">
-                <h5><i class="bi bi-wrench"></i> Servizi</h5>
-                <p class="fs-4">{{ stat_servizi }}</p>
-            </div>
+            <a href="{{ url_for('admin.gestisci_servizi') }}" class="text-decoration-none">
+                <div class="bg-info text-white p-3 rounded shadow-sm">
+                    <h5><i class="bi bi-wrench"></i> Servizi</h5>
+                    <p class="fs-4">{{ stat_servizi }}</p>
+                </div>
+            </a>
         </div>
     </div>
+    
 
         <!--SEZIONI PRINCIPALI -->
     <div class="row">

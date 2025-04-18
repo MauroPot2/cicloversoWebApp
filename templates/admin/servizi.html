@@ -1,17 +1,20 @@
 {% extends "basic/layout.html" %}
 {% block content %}
 
-<div class="d-flex">
+<div class="d-flex flex-column flex-md-row">
   {% include 'admin/sidebar.html' %}
 
   <div class="container mt-4">
-    <h2>Gestione Servizi</h2>
-    <a href="{{ url_for('admin.modifica_servizio', servizio_id=0) }}" class="btn btn-success mb-3">
-      <i class="bi bi-plus-circle"></i> Aggiungi Servizio
-    </a>
+    <h2 class="mb-4 text-center text-md-start">🛠️ Gestione Servizi</h2>
+
+    <div class="mb-3 text-end">
+      <a href="{{ url_for('admin.modifica_servizio', servizio_id=0) }}" class="btn btn-success">
+        <i class="bi bi-plus-circle"></i> Aggiungi Servizio
+      </a>
+    </div>
 
     <div class="table-responsive">
-      <table class="table table-bordered table-hover">
+      <table class="table table-bordered table-hover table-striped align-middle text-center">
         <thead class="table-dark">
           <tr>
             <th>Immagine</th>
@@ -24,31 +27,34 @@
         <tbody>
           {% for servizio in servizi %}
           <tr>
-            <td><img src="/{{ servizio['immagine'] }}" alt="img" width="80"></td>
+            <td>
+              <img src="/{{ servizio['immagine'] }}" alt="img" width="80" class="img-fluid rounded">
+            </td>
             <td>{{ servizio['Servizio'] }}</td>
             <td>{{ servizio['Prezzo'] }} €</td>
             <td>{{ servizio['Disponibilitá'] }}</td>
             <td>
-              <a href="{{ url_for('admin.modifica_servizio', servizio_id=servizio['id']) }}" class="btn btn-sm btn-warning">
-                <i class="bi bi-pencil-square"></i> Modifica
-              </a>
-              <!-- Bottone per attivare il modale -->
-              <button class="btn btn-sm btn-danger" data-bs-toggle="modal" data-bs-target="#confermaElimina{{ servizio['id'] }}">
-                <i class="bi bi-trash"></i> Elimina
-              </button>
+              <div class="d-flex flex-column flex-sm-row gap-2 justify-content-center">
+                <a href="{{ url_for('admin.modifica_servizio', servizio_id=servizio['id']) }}" class="btn btn-sm btn-warning">
+                  ✏️ Modifica
+                </a>
+                <button class="btn btn-sm btn-danger" data-bs-toggle="modal" data-bs-target="#confermaElimina{{ servizio['id'] }}">
+                  🗑️ Elimina
+                </button>
+              </div>
 
               <!-- Modale di conferma eliminazione -->
               <div class="modal fade" id="confermaElimina{{ servizio['id'] }}" tabindex="-1" aria-labelledby="modaleLabel{{ servizio['id'] }}" aria-hidden="true">
-                <div class="modal-dialog">
+                <div class="modal-dialog modal-dialog-centered">
                   <div class="modal-content">
                     <div class="modal-header bg-danger text-white">
                       <h5 class="modal-title" id="modaleLabel{{ servizio['id'] }}">Conferma Eliminazione</h5>
                       <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Chiudi"></button>
                     </div>
-                    <div class="modal-body">
+                    <div class="modal-body text-center">
                       Sei sicuro di voler eliminare il servizio <strong>{{ servizio['Servizio'] }}</strong>?
                     </div>
-                    <div class="modal-footer">
+                    <div class="modal-footer justify-content-between">
                       <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annulla</button>
                       <form action="{{ url_for('admin.elimina_servizio', servizio_id=servizio['id']) }}" method="POST">
                         <button type="submit" class="btn btn-danger">Conferma</button>
@@ -57,7 +63,6 @@
                   </div>
                 </div>
               </div>
-
             </td>
           </tr>
           {% endfor %}

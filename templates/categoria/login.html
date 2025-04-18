@@ -12,7 +12,12 @@
                         <h2 class="fw-bold">Bentornato!</h2>
                         <p class="text-muted">Accedi per continuare</p>
                     </div>
-
+                    {% if error %}
+                    <div class="alert alert-danger mt-3 d-flex align-items-center justify-content-center gap-2" role="alert">
+                        <i class="bi bi-exclamation-triangle-fill"></i>
+                        <span>{{ error }}</span>
+                    </div>
+                    {% endif %}
                     <form method="POST" action="{{ url_for('auth.login') }}">
                         <div class="mb-3">
                             <label for="email" class="form-label">Indirizzo Email</label>
@@ -41,12 +46,7 @@
                         </div>
                     </form>
 
-                    {% if error %}
-                    <div class="alert alert-danger mt-3 text-center" role="alert">
-                        {{ error }}
-                    </div>
-                    {% endif %}
-
+                    
                 </div>
             </div>
         </div>

@@ -23,7 +23,10 @@
       <li><a href="{{ url_for('admin.gestisci_utenti') }}" class="nav-link {% if request.endpoint == 'admin.gestisci_utenti' %}active{% endif %}"><i class="bi bi-people me-2"></i>Utenti</a></li>
       <li><a href="{{ url_for('admin.gestisci_servizi') }}" class="nav-link {% if request.endpoint == 'admin.gestisci_servizi' %}active{% endif %}"><i class="bi bi-tools me-2"></i>Servizi</a></li>
       <li><a href="{{ url_for('admin.mostra_orari_apertura') }}" class="nav-link {% if request.endpoint == 'admin.mostra_orari_apertura' %}active{% endif %}"><i class="bi bi-clock-history me-2"></i>Orari Apertura</a></li>
-      <li><a href="{{ url_for('auth.logout') }}" class="nav-link {% if request.endpoint == 'auth.logout' %}active{% endif %}"><i class="bi bi-clock-history me-2"></i>Logout</a></li>
+      <li><a href="#" class="nav-link" data-bs-toggle="modal" data-bs-target="#modaleLogout">
+        <i class="bi bi-box-arrow-right me-2"></i> Logout</a>
+      </li>
+      
     </ul>
   </div>
 </div>

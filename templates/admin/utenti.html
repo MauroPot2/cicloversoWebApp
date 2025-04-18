@@ -1,57 +1,71 @@
 {% extends "basic/layout.html" %}
 {% block content %}
-<div class="d-flex">
-    {% include 'admin/sidebar.html' %}
-<div class="container mt-4">
-    <h2 class="mb-4">👥 Gestione Utenti</h2>
+<div class="d-flex flex-column flex-md-row">
+  {% include 'admin/sidebar.html' %}
+
+  <div class="container mt-4">
+    <h2 class="mb-4 text-center text-md-start">👥 Gestione Utenti</h2>
 
     {% with messages = get_flashed_messages(with_categories=true) %}
       {% if messages %}
         {% for category, message in messages %}
-          <div class="alert alert-{{ category }}">{{ message }}</div>
+          <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
+            {{ message }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Chiudi"></button>
+          </div>
         {% endfor %}
       {% endif %}
     {% endwith %}
-    <form method="get" action="{{ url_for('admin.gestisci_utenti') }}" class="mb-3 d-flex justify-content-between align-items-center">
-        <div class="input-group w-50">
-            <input type="text" name="search" class="form-control" placeholder="🔍 Cerca per nome, cognome o email..." value="{{ search }}">
-            <button class="btn btn-outline-secondary" type="submit">Cerca</button>
-        </div>
+
+    <!-- Barra di ricerca -->
+    <form method="get" action="{{ url_for('admin.gestisci_utenti') }}" class="mb-4">
+      <div class="input-group">
+        <input type="text" name="search" class="form-control" placeholder="🔍 Cerca per nome, cognome o email..." value="{{ search }}">
+        <button class="btn btn-outline-secondary" type="submit">Cerca</button>
+      </div>
     </form>
-    <div class="d-flex justify-content-between align-items-center mb-3">
-        <a href="{{ url_for('admin.aggiungi_utente') }}" class="btn btn-success">
-            ➕ Aggiungi Utente
-        </a>
+
+    <!-- Pulsante aggiungi utente -->
+    <div class="mb-3 text-end">
+      <a href="{{ url_for('admin.aggiungi_utente') }}" class="btn btn-success">
+        ➕ Aggiungi Utente
+      </a>
     </div>
-    <table class="table table-bordered table-hover">
-        <thead class="table-light">
-            <tr>
-                <th>Nome</th>
-                <th>Cognome</th>
-                <th>Email</th>
-                <th>Cellulare</th>
-                <th>Ruolo</th>
-                <th>Azioni</th>
-            </tr>
+
+    <!-- Tabella responsive -->
+    <div class="table-responsive">
+      <table class="table table-bordered table-hover table-striped align-middle text-center">
+        <thead class="table-dark">
+          <tr>
+            <th>Nome</th>
+            <th>Cognome</th>
+            <th>Email</th>
+            <th>Cellulare</th>
+            <th>Ruolo</th>
+            <th>Azioni</th>
+          </tr>
         </thead>
         <tbody>
-            {% for utente in utenti %}
-            <tr>
-                <td>{{ utente.nome }}</td>
-                <td>{{ utente.cognome }}</td>
-                <td>{{ utente.email }}</td>
-                <td>{{ utente.cellulare }}</td>
-                <td>{{ utente.ruolo }}</td>
-                <td>
-                    <a href="{{ url_for('admin.modifica_utente', id=utente.id) }}" class="btn btn-sm btn-warning">✏️ Modifica</a>
-                    <form action="{{ url_for('admin.elimina_utente', id=utente.id) }}" method="post" style="display:inline-block" onsubmit="return confirm('Sei sicuro di voler eliminare questo utente?');">
-                        <button type="submit" class="btn btn-sm btn-danger">🗑️ Elimina</button>
-                    </form>
-                </td>
-            </tr>
-            {% endfor %}
+          {% for utente in utenti %}
+          <tr>
+            <td>{{ utente.nome }}</td>
+            <td>{{ utente.cognome }}</td>
+            <td>{{ utente.email }}</td>
+            <td>{{ utente.cellulare }}</td>
+            <td>{{ utente.ruolo }}</td>
+            <td>
+              <div class="d-flex flex-column flex-sm-row gap-2 justify-content-center">
+                <a href="{{ url_for('admin.modifica_utente', id=utente.id) }}" class="btn btn-sm btn-warning">✏️ Modifica</a>
+                <form action="{{ url_for('admin.elimina_utente', id=utente.id) }}" method="post" onsubmit="return confirm('Sei sicuro di voler eliminare questo utente?');">
+                  <button type="submit" class="btn btn-sm btn-danger">🗑️ Elimina</button>
+                </form>
+              </div>
+            </td>
+          </tr>
+          {% endfor %}
         </tbody>
-    </table>
-</div>
+      </table>
+    </div>
+  </div>
 </div>
 {% endblock %}

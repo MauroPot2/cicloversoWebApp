@@ -1,40 +1,51 @@
 {% extends "basic/layout.html" %}
 {% block content %}
-<div class="d-flex">
-    {% include 'admin/sidebar.html' %}
-    <div class="container mt-4">
-        <h2>➕ Aggiungi Utente</h2>
-        <form method="POST">
-            <div class="mb-3">
-                <label class="form-label">Nome</label>
-                <input type="text" class="form-control" name="nome" required>
-            </div>
-            <div class="mb-3">
-                <label class="form-label">Cognome</label>
-                <input type="text" class="form-control" name="cognome" required>
-            </div>
-            <div class="mb-3">
-                <label class="form-label">Email</label>
-                <input type="email" class="form-control" name="email" required>
-            </div>
-            <div class="mb-3">
-                <label class="form-label">Cellulare</label>
-                <input type="text" class="form-control" name="cellulare" required>
-            </div>
-            <div class="mb-3">
-                <label class="form-label">Ruolo</label>
-                <select name="ruolo" class="form-control">
-                    <option value="utente">Utente</option>
-                    <option value="admin">Admin</option>
-                </select>
-            </div>
-            <div class="mb-3">
-                <label class="form-label">Password</label>
-                <input type="password" class="form-control" name="password" required>
-            </div>
-            <button type="submit" class="btn btn-primary">💾 Salva</button>
-            <a href="{{ url_for('admin.gestisci_utenti') }}" class="btn btn-secondary">Annulla</a>
-        </form>
-    </div>
+<div class="d-flex flex-column flex-md-row">
+  {% include 'admin/sidebar.html' %}
+
+  <div class="container mt-4">
+    <h2 class="mb-4 text-center text-md-start">➕ Aggiungi Utente</h2>
+
+    <form method="POST" class="row g-3">
+      <div class="col-md-6">
+        <label class="form-label">Nome</label>
+        <input type="text" class="form-control" name="nome" required>
+      </div>
+      <div class="col-md-6">
+        <label class="form-label">Cognome</label>
+        <input type="text" class="form-control" name="cognome" required>
+      </div>
+
+      <div class="col-md-6">
+        <label class="form-label">Email</label>
+        <input type="email" class="form-control" name="email" required>
+      </div>
+      <div class="col-md-6">
+        <label class="form-label">Cellulare</label>
+        <input type="text" class="form-control" name="cellulare" required>
+      </div>
+
+      <div class="col-md-6">
+        <label class="form-label">Ruolo</label>
+        <select name="ruolo" class="form-select">
+          <option value="utente">Utente</option>
+          <option value="admin">Admin</option>
+        </select>
+      </div>
+      <div class="col-md-6">
+        <label class="form-label">Password</label>
+        <input type="password" class="form-control" name="password" required>
+      </div>
+
+      <div class="col-12 d-flex justify-content-between mt-3">
+        <button type="submit" class="btn btn-primary">
+          💾 Salva
+        </button>
+        <a href="{{ url_for('admin.gestisci_utenti') }}" class="btn btn-secondary">
+          Annulla
+        </a>
+      </div>
+    </form>
+  </div>
 </div>
 {% endblock %}

@@ -19,6 +19,8 @@
 <!-- FullCalendar CSS/JS -->
 <link href="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.8/index.global.min.css" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.8/index.global.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.8/locales-all.global.min.js"></script>
+
 
 <!-- Modale prenotazione -->
 <div class="modal fade" id="modalePrenotazione" tabindex="-1" aria-labelledby="modalePrenotazioneLabel" aria-hidden="true">
@@ -81,6 +83,11 @@ document.addEventListener('DOMContentLoaded', function () {
       center: 'title',
       right: 'dayGridMonth,timeGridWeek'
     },
+    buttonText: {
+      today:    'Oggi',
+      month:    'Mese',
+      week:     'Settimana'
+    },
     events: function(fetchInfo, successCallback, failureCallback) {
       fetch(`/api/slot?start=${fetchInfo.startStr}&end=${fetchInfo.endStr}`)
         .then(response => response.json())
@@ -90,7 +97,7 @@ document.addEventListener('DOMContentLoaded', function () {
             .filter(slot => new Date(slot.data + "T" + slot.ora_inizio) > now)
             .map(slot => ({
               id: slot.id,
-              title: "Slot disponibile",
+              title: "Prenotami",
               start: `${slot.data}T${slot.ora_inizio}`,
               end: `${slot.data}T${slot.ora_fine}`
             }));
