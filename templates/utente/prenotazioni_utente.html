@@ -1,85 +1,257 @@
 {% extends "basic/layout.html" %}
+
+{% block title %}Le tue prenotazioni{% endblock %}
+
+{# Se nel tuo basic/layout.html esiste questo blocco, evita i link duplicati in navbar #}
+{% block navbar_links %}{% endblock %}
+
+{% block head %}
+  {{ super() }}
+  <style>
+    .page-shell{
+      border: 1px solid rgba(0,0,0,.08);
+      border-radius: 16px;
+      padding: 16px;
+      background: var(--bs-body-bg);
+      box-shadow: 0 .5rem 1.25rem rgba(0,0,0,.06);
+    }
+    .booking-card{
+      border-radius: 16px;
+      border: 1px solid rgba(0,0,0,.08);
+      transition: transform .12s ease, box-shadow .12s ease;
+    }
+    .booking-card:hover{
+      transform: translateY(-2px);
+      box-shadow: 0 .75rem 1.5rem rgba(0,0,0,.08);
+    }
+    .meta-line{
+      display:flex;
+      gap:.5rem;
+      align-items:center;
+      color: var(--bs-secondary-color);
+      font-size: .95rem;
+      margin-bottom: .25rem;
+    }
+    .meta-line b{ color: var(--bs-body-color); font-weight: 600; }
+  </style>
+{% endblock %}
+
 {% block content %}
-<div class="d-flex flex-column flex-md-row">
+<div class="container-fluid py-4">
+  <div class="row g-4">
 
-  <div class="container mt-4">
-    <h2>Le tue prenotazioni</h2>
+    <!-- Main -->
+    <main class="col-12 col-lg-9 col-xl-10">
 
-    {% if prenotazioni %}
-      <div class="row row-cols-1 row-cols-md-2 g-3" id="lista-prenotazioni">
-        {% for prenotazione in prenotazioni %}
-        <div class="col" id="card-prenotazione-{{ prenotazione['prenotazione_id'] }}">
-          <div class="card shadow-sm">
-            <div class="card-body">
-              <h5 class="card-title">{{ prenotazione['Servizio']}}</h5>
-              <p class="card-text">
-                📅 Data: {{ prenotazione['data'] }}<br>
-                🕒 Orario: {{ prenotazione['ora_inizio'] }} - {{ prenotazione['ora_fine'] }}<br>
-                💶 Prezzo: {{ prenotazione['Prezzo'] or 'N.D.' }} €
-              </p>
+      <div class="d-flex flex-column flex-md-row align-items-md-center justify-content-between gap-3 mb-3">
+        <div>
+          <h1 class="h3 mb-1">🧾 Le tue prenotazioni</h1>
+          <div class="text-muted">Gestisci i tuoi appuntamenti e annulla quando possibile (entro 48h).</div>
+        </div>
 
+        <div class="d-flex gap-2">
+          <span class="badge text-bg-primary" id="badgeCount">0</span>
+          <span class="badge text-bg-secondary">48h regola annullo</span>
+        </div>
+      </div>
+
+      <section class="page-shell">
+        {% if prenotazioni %}
+          <div class="row row-cols-1 row-cols-md-2 row-cols-xl-3 g-3" id="lista-prenotazioni">
+            {% for prenotazione in prenotazioni %}
               {% set slot_datetime = prenotazione['data'] ~ ' ' ~ prenotazione['ora_inizio'] %}
               {% set slot_timestamp = slot_datetime | to_datetime('%Y-%m-%d %H:%M:%S') %}
               {% set now = current_time %}
-              {% if (slot_timestamp.timestamp() - now.timestamp()) > 172800 %}
-                <button class="btn btn-outline-danger btn-sm" onclick="annullaPrenotazione({{ prenotazione['prenotazione_id'] }})">
-                  Annulla prenotazione
-                </button>
-              {% else %}
-                <span class="badge bg-secondary">Non annullabile</span><br>
-                <small class="text-muted">Annullabile solo entro 48h dall'appuntamento.</small>
-              {% endif %}
-            </div>
+              {% set seconds_to = (slot_timestamp.timestamp() - now.timestamp()) %}
+              {% set cancellabile = seconds_to > 172800 %}
+              {% set passata = seconds_to < 0 %}
+
+              <div class="col" id="card-prenotazione-{{ prenotazione['prenotazione_id'] }}">
+                <div class="card booking-card h-100">
+                  <div class="card-body d-flex flex-column">
+
+                    <div class="d-flex align-items-start justify-content-between gap-2 mb-2">
+                      <h5 class="card-title mb-0">{{ prenotazione['Servizio'] }}</h5>
+
+                      {% if passata %}
+                        <span class="badge text-bg-dark">Passata</span>
+                      {% else %}
+                        <span class="badge text-bg-success">In arrivo</span>
+                      {% endif %}
+                    </div>
+
+                    <div class="meta-line">
+                      <span>📅</span>
+                      <span><b>Data:</b> {{ prenotazione['data'] }}</span>
+                    </div>
+
+                    <div class="meta-line">
+                      <span>🕒</span>
+                      <span><b>Orario:</b> {{ prenotazione['ora_inizio'] }} – {{ prenotazione['ora_fine'] }}</span>
+                    </div>
+
+                    <div class="meta-line mb-3">
+                      <span>💶</span>
+                      <span><b>Prezzo:</b> {{ prenotazione['Prezzo'] or 'N.D.' }} €</span>
+                    </div>
+
+                    <div class="mt-auto">
+                      {% if cancellabile and not passata %}
+                        <button
+                          class="btn btn-outline-danger btn-sm w-100"
+                          data-cancel-btn
+                          onclick="chiediAnnullamento({{ prenotazione['prenotazione_id'] }})">
+                          Annulla prenotazione
+                        </button>
+                        <small class="text-muted d-block mt-2">Annullabile fino a 48h prima dell’appuntamento.</small>
+                      {% else %}
+                        <div class="d-flex flex-column gap-1">
+                          <span class="badge text-bg-secondary align-self-start">Non annullabile</span>
+                          <small class="text-muted">
+                            {% if passata %}
+                              Appuntamento già trascorso.
+                            {% else %}
+                              Annullabile solo entro 48h dall'appuntamento.
+                            {% endif %}
+                          </small>
+                        </div>
+                      {% endif %}
+                    </div>
+
+                  </div>
+                </div>
+              </div>
+            {% endfor %}
           </div>
-        </div>
-        {% endfor %}
+
+          <div id="messaggio-nessuna-prenotazione" class="alert alert-info mt-3 d-none">
+            Non hai ancora effettuato prenotazioni.
+          </div>
+        {% else %}
+          <div id="messaggio-nessuna-prenotazione" class="alert alert-info">
+            Non hai ancora effettuato prenotazioni.
+          </div>
+        {% endif %}
+      </section>
+
+    </main>
+  </div>
+</div>
+
+<!-- MODAL conferma annullamento -->
+<div class="modal fade" id="modalConfermaAnnulla" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content shadow">
+      <div class="modal-header">
+        <h5 class="modal-title">Confermi annullamento?</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Chiudi"></button>
       </div>
-    {% else %}
-      <div id="messaggio-nessuna-prenotazione" class="alert alert-info mt-3">
-        Non hai ancora effettuato prenotazioni.
+      <div class="modal-body">
+        Questa azione annullerà la prenotazione selezionata. Vuoi continuare?
       </div>
-    {% endif %}
+      <div class="modal-footer">
+        <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">No</button>
+        <button type="button" class="btn btn-danger" id="btnConfermaAnnulla">Sì, annulla</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- TOAST -->
+<div class="toast-container position-fixed bottom-0 end-0 p-3">
+  <div id="appToast" class="toast align-items-center border-0" role="alert" aria-live="assertive" aria-atomic="true">
+    <div class="d-flex">
+      <div class="toast-body" id="appToastText">OK</div>
+      <button type="button" class="btn-close me-2 m-auto" data-bs-dismiss="toast" aria-label="Chiudi"></button>
+    </div>
   </div>
 </div>
 
 <script>
-  function annullaPrenotazione(id) {
-    if (confirm("Vuoi davvero annullare questa prenotazione?")) {
-      fetch(`/api/prenotazione/${id}`, {
-        method: 'DELETE'
-      })
-      .then(res => res.json())
-      .then(data => {
-        if (data.error) {
-          alert(data.error);
-          return;
-        }
+  let PENDING_CANCEL_ID = null;
 
-        alert(data.message || "Prenotazione annullata.");
+  function updateCountBadge(){
+    const cards = document.querySelectorAll('.col[id^="card-prenotazione-"]');
+    const badge = document.getElementById('badgeCount');
+    if(badge) badge.textContent = `${cards.length} prenotazioni`;
+  }
 
-       
-        const card = document.getElementById(`card-prenotazione-${id}`);
-        if (card) {
-          card.remove();
-        }
+  function showToast(message, type="success"){
+    const toastEl = document.getElementById("appToast");
+    const toastText = document.getElementById("appToastText");
 
-       
-        const ancoraCard = document.querySelectorAll('.col[id^="card-prenotazione-"]');
-        if (ancoraCard.length === 0) {
-          const lista = document.getElementById("lista-prenotazioni");
-          lista.insertAdjacentHTML('afterend', `
-            <div id="messaggio-nessuna-prenotazione" class="alert alert-info mt-3">
-              Non hai ancora effettuato prenotazioni.
-            </div>
-          `);
-        }
+    toastEl.classList.remove("text-bg-success", "text-bg-danger", "text-bg-primary", "text-bg-dark");
+    toastEl.classList.add(type === "danger" ? "text-bg-danger" : "text-bg-success");
 
-      })
-      .catch(err => {
-        console.error(err);
-        alert("Errore durante l'annullamento.");
-      });
+    toastText.textContent = message;
+
+    new bootstrap.Toast(toastEl, { delay: 2200 }).show();
+  }
+
+  function chiediAnnullamento(id){
+    PENDING_CANCEL_ID = id;
+    const modal = new bootstrap.Modal(document.getElementById("modalConfermaAnnulla"));
+    modal.show();
+  }
+
+  async function annullaPrenotazione(id){
+    // loading state sul bottone (se presente)
+    const btn = document.querySelector(`#card-prenotazione-${id} [data-cancel-btn]`);
+    const oldText = btn ? btn.innerHTML : null;
+    if(btn){
+      btn.disabled = true;
+      btn.innerHTML = `<span class="spinner-border spinner-border-sm me-2"></span>Annullamento...`;
+    }
+
+    try{
+      const res = await fetch(`/api/prenotazione/${id}`, { method: "DELETE" });
+
+      let data = {};
+      try { data = await res.json(); } catch(e) {}
+
+      if(!res.ok || data.error){
+        throw new Error(data.error || "Errore durante l'annullamento.");
+      }
+
+      // remove card
+      const card = document.getElementById(`card-prenotazione-${id}`);
+      if(card) card.remove();
+
+      showToast(data.message || "Prenotazione annullata.");
+
+      // empty state
+      const remaining = document.querySelectorAll('.col[id^="card-prenotazione-"]');
+      const emptyMsg = document.getElementById("messaggio-nessuna-prenotazione");
+      const lista = document.getElementById("lista-prenotazioni");
+
+      if(remaining.length === 0){
+        if(lista) lista.classList.add("d-none");
+        if(emptyMsg) emptyMsg.classList.remove("d-none");
+      }
+
+      updateCountBadge();
+
+    } catch(err){
+      console.error(err);
+      showToast(err.message || "Errore durante l'annullamento.", "danger");
+      if(btn){
+        btn.disabled = false;
+        btn.innerHTML = oldText;
+      }
     }
   }
+
+  document.addEventListener("DOMContentLoaded", () => {
+    updateCountBadge();
+
+    const confirmBtn = document.getElementById("btnConfermaAnnulla");
+    confirmBtn?.addEventListener("click", () => {
+      const modalEl = document.getElementById("modalConfermaAnnulla");
+      bootstrap.Modal.getInstance(modalEl).hide();
+
+      if(PENDING_CANCEL_ID) annullaPrenotazione(PENDING_CANCEL_ID);
+      PENDING_CANCEL_ID = null;
+    });
+  });
 </script>
 {% endblock %}
